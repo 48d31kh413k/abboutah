@@ -2,11 +2,11 @@
 
 A System Administration project focused on learning Kubernetes fundamentals using K3s, K3d, Vagrant, and Argo CD.
 
-## 📋 Overview
+##  Overview
 
 This project aims to deepen knowledge in Kubernetes by using K3d and K3s with Vagrant. You will learn how to set up personal virtual machines, configure K3s with Ingress, and implement continuous integration with Argo CD.
 
-## 🎯 Objectives
+##  Objectives
 
 - Set up virtual machines with Vagrant
 - Install and configure K3s in controller and agent modes
@@ -14,7 +14,7 @@ This project aims to deepen knowledge in Kubernetes by using K3d and K3s with Va
 - Use K3d for simplified Kubernetes management
 - Implement continuous integration with Argo CD
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 .
@@ -35,7 +35,7 @@ This project aims to deepen knowledge in Kubernetes by using K3d and K3s with Va
     └── confs/
 ```
 
-## 🚀 Mandatory Parts
+## Mandatory Parts
 
 ### Part 1: K3s and Vagrant
 
@@ -115,7 +115,7 @@ kubectl get pods -n dev
 curl http://localhost:8888/
 ```
 
-## 🌟 Bonus Part
+## Bonus Part
 
 Add GitLab to Part 3 setup.
 
@@ -127,9 +127,9 @@ Add GitLab to Part 3 setup.
 - All Part 3 functionality must work with local GitLab
 - Use helm or other tools as needed
 
-> ⚠️ The bonus part will only be assessed if the mandatory part is flawless.
+> The bonus part will only be assessed if the mandatory part is flawless.
 
-## 📝 General Guidelines
+## General Guidelines
 
 - All work must be done in virtual machines
 - Configuration files organized in folders at repository root
@@ -139,7 +139,7 @@ Add GitLab to Part 3 setup.
 - Configuration files go in `confs/` folder
 - Use any tools for host VM setup and Vagrant provider
 
-## 🛠️ Technologies
+## Technologies
 
 - **Vagrant** - Virtual machine management
 - **K3s** - Lightweight Kubernetes distribution
@@ -149,7 +149,7 @@ Add GitLab to Part 3 setup.
 - **kubectl** - Kubernetes command-line tool
 - **GitLab** (Bonus) - DevOps platform
 
-## 📚 Resources
+## Resources
 
 - [K3s Documentation](https://docs.k3s.io/)
 - [K3d Documentation](https://k3d.io/)
@@ -167,7 +167,7 @@ Modern Linux distributions use predictable network interface names (e.g., `enp0s
 
 Adapt commands according to your system's actual interface names.
 
-## 📤 Submission
+## Submission
 
 - Submit via Git repository
 - Ensure correct folder and file names
@@ -175,7 +175,7 @@ Adapt commands according to your system's actual interface names.
 - Optional bonus in `bonus` folder
 - Evaluation happens on the evaluated group's computer
 
-## ⚠️ Important Notes
+## Important Notes
 
 - Read extensive documentation on K8s, K3s, and K3d
 - Follow modern Vagrant practices
@@ -185,6 +185,6 @@ Adapt commands according to your system's actual interface names.
 
 ---
 
-**Project Date:** September 2024  
+**Project Date:** March 2026 
 **Course:** System Administration  
 **Difficulty:** Intermediate to Advanced
