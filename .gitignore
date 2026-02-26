@@ -1,0 +1,162 @@
+# Vagrant
+.vagrant/
+*.box
+.DS_Store
+ubuntu-*-console.log
+
+# Vagrant log files
+*.log
+
+# Vagrant provider-specific files
+.vagrant.d/
+
+# SSH keys
+*.pem
+*.key
+id_rsa*
+*.pub
+
+# Kubernetes
+kubeconfig
+*.kubeconfig
+.kube/
+*.token
+
+# Secrets and sensitive data
+*secret*
+*password*
+*.env
+.envrc
+
+# K3s/K3d
+k3s.yaml
+k3d-registry/
+
+# Docker
+.dockerignore
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS Files
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# IDEs and Editors
+# VSCode
+.vscode/
+*.code-workspace
+
+# IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+
+# Vim
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+Session.vim
+.netrwhist
+*~
+
+# Emacs
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+*.bak
+*.backup
+
+# Compiled files
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Package files
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# GitLab (for bonus part)
+gitlab-data/
+gitlab-config/
+gitlab-logs/
+
+# Helm charts cache (for bonus)
+*.tgz
+charts/
+
+# Terraform (if used)
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+
+# Ansible (if used)
+*.retry
+
+# Custom ignore patterns
+# Add any project-specific files or folders here
+test-results/
+coverage/
+node_modules/
