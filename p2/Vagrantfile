@@ -1,0 +1,44 @@
+env_file_path = File.join(File.dirname(__FILE__), '.env')
+if File.exist?(env_file_path)
+  File.read(env_file_path).each_line do |line|
+    key, value = line.strip.split('=')
+    ENV[key] = value
+  end
+end
+
+Vagrant.configure(2) do |config|
+  config.vm.box = "bento/debian-12"
+
+  config.vm.provider "virtualbox" do |v|
+    v.memory = 1024
+    v.cpus = 1
+    v.gui = false
+  end
+
+  config.vm.define "alagmiri" do |server|
+    server.vm.hostname = "alagmiri"
+    server.vm.network "private_network", bridge: "eth1", ip: "192.168.56.110"
+    server.vm.provision "shell", inline: <<-SHELL
+      sudo apt-get update -qq 
+      sudo apt-get install -qq -y curl net-tools
+
+      curl -fsSL https://get.docker.com -o get-docker.sh
+      sudo sh get-docker.sh 2>&1 >/dev/null
+      sudo usermod -aG docker vagrant
+
+      echo 'export PATH=$PATH:/sbin' >> /home/vagrant/.bashrc
+      source /home/vagrant/.bashrc
+
+      curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="server --node-ip 192.168.56.110" \
+        K3S_TOKEN="#{ENV['K3S_TOKEN']}" \
+        K3S_KUBECONFIG_MODE="644" sh -s -
+        kubectl apply -f /vagrant/confs/namespace.yaml
+        sleep 10
+  
+      kubectl apply -f /vagrant/confs/app1.yaml
+      kubectl apply -f /vagrant/confs/app2.yaml
+      kubectl apply -f /vagrant/confs/app3.yaml
+      kubectl apply -f /vagrant/confs/ingress.yaml
+    SHELL
+  end
+end
