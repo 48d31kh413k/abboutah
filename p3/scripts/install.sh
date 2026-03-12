@@ -31,12 +31,20 @@ rm argocd
 # ─── Create K3d cluster ───────────────────────────────────────────────────────
 # Run k3d via the docker group without needing to log out/in
 if ! groups | grep -q docker; then
-  sudo k3d cluster create "$CLUSTER_NAME" --port "8888:8888@loadbalancer"
+  if sudo k3d cluster list 2>/dev/null | awk 'NR>1 {print $1}' | grep -qx "$CLUSTER_NAME"; then
+    echo "k3d cluster '$CLUSTER_NAME' already exists, reusing it"
+  else
+    sudo k3d cluster create "$CLUSTER_NAME" --port "8888:8888@loadbalancer"
+  fi
   mkdir -p ~/.kube
   sudo k3d kubeconfig get "$CLUSTER_NAME" | sudo tee ~/.kube/config > /dev/null
   sudo chown "$USER":"$USER" ~/.kube/config
 else
-  k3d cluster create "$CLUSTER_NAME" --port "8888:8888@loadbalancer"
+  if k3d cluster list 2>/dev/null | awk 'NR>1 {print $1}' | grep -qx "$CLUSTER_NAME"; then
+    echo "k3d cluster '$CLUSTER_NAME' already exists, reusing it"
+  else
+    k3d cluster create "$CLUSTER_NAME" --port "8888:8888@loadbalancer"
+  fi
   mkdir -p ~/.kube
   k3d kubeconfig get "$CLUSTER_NAME" > ~/.kube/config
 fi
