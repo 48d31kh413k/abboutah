@@ -36,17 +36,31 @@ Part 3 implements a local GitOps workflow:
 
 ## 3) Files and responsibilities
 
-- `scripts/install.sh`
-  Installs dependencies, creates K3d cluster, installs Argo CD, applies app config.
+### `scripts/install.sh`
+The bootstrap script. This is the only file you need to run manually.
+It installs all required tools (Docker, kubectl, k3d, argocd CLI), creates the K3d cluster, then applies all Kubernetes manifests in order. Without this script the cluster and Argo CD would not exist.
 
-- `confs/namespace.yaml`
-  Creates `argocd` and `dev` namespaces.
+### `confs/namespace.yaml`
+A Kubernetes manifest that creates two namespaces: `argocd` and `dev`.
+- `argocd`: Argo CD system components (server, repo-server, application-controller, etc.) will live here.
+- `dev`: Your application will be deployed here by Argo CD.
+Namespaces are applied first so the subsequent installs have somewhere to deploy into.
 
-- `confs/argocd-app.yaml`
-  Defines the Argo CD Application that tracks this repository path: `p3/confs/app`.
+### `confs/argocd-app.yaml`
+A Kubernetes custom resource of kind `Application` (owned by Argo CD).
+This is the GitOps contract between Argo CD and your GitHub repository.
+It tells Argo CD:
+- `repoURL`: which GitHub repository to watch.
+- `path`: which folder inside the repo contains Kubernetes manifests (`p3/confs/app`).
+- `targetRevision: HEAD`: always sync from the latest commit.
+- `destination.namespace: dev`: deploy whatever it finds in that folder into the `dev` namespace.
+- `automated.prune: true`: if a resource is removed from Git, delete it from the cluster too.
+- `automated.selfHeal: true`: if someone manually changes a resource in the cluster, revert it back to match Git.
 
-- `confs/app/deployment.yaml`
-  Contains Kubernetes Deployment + Service for app `playground`.
+### `confs/app/deployment.yaml`
+The actual application manifests tracked and deployed by Argo CD. Contains two resources:
+- **Deployment**: instructs Kubernetes to run 1 replica of the `wil42/playground` container on port `8888`. Changing the image tag here (e.g. `v1` → `v2`) and pushing to Git is what triggers an automatic version update.
+- **Service**: exposes the container inside the cluster under a stable DNS name (`playground.dev.svc.cluster.local`), which is what you port-forward to access the app from your host machine.
 
 ## 4) How the install script works (step by step)
 
