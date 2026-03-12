@@ -10,8 +10,12 @@ sudo apt-get update -y
 sudo apt-get install -y docker.io curl ca-certificates
 
 sudo systemctl enable docker
-sudo systemctl start docker
-sudo usermod -aG docker "$USER"
+if ! sudo systemctl is-active --quiet docker; then
+  sudo systemctl start docker
+fi
+if ! id -nG "$USER" | grep -qw docker; then
+  sudo usermod -aG docker "$USER"
+fi
 
 # ─── Install kubectl ─────────────────────────────────────────────────────────
 KUBECTL_VERSION="$(curl -L -s https://dl.k8s.io/release/stable.txt)"
