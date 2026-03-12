@@ -47,7 +47,7 @@ export KUBECONFIG=~/.kube/config
 kubectl apply -f "$CONFS_DIR/namespace.yaml"
 
 # ─── Install Argo CD ─────────────────────────────────────────────────────────
-kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+kubectl apply --server-side -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
 echo "Waiting for Argo CD server to be ready..."
 kubectl wait --for=condition=available --timeout=300s deployment/argocd-server -n argocd
