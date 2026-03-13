@@ -7,7 +7,7 @@ CLUSTER_NAME="iot-cluster"
 
 # ─── Install Docker ───────────────────────────────────────────────────────────
 sudo apt-get update -y
-sudo apt-get install -y docker.io curl ca-certificates
+sudo apt-get install -y docker.io curl ca-certificates git
 
 sudo systemctl enable docker
 if ! sudo systemctl is-active --quiet docker; then
@@ -55,6 +55,29 @@ fi
 
 export KUBECONFIG=~/.kube/config
 
+# ─── Resolve and validate Git repository URL for Argo CD ─────────────────────
+ROOT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+DEFAULT_REPO_URL="$(git -C "$ROOT_DIR" remote get-url origin 2>/dev/null || true)"
+REPO_URL="${REPO_URL:-$DEFAULT_REPO_URL}"
+
+if [[ -z "$REPO_URL" ]]; then
+  REPO_URL="https://github.com/abboutah/Inception-of-things"
+fi
+
+# Convert SSH GitHub remotes to HTTPS for Argo CD repo-server access
+if [[ "$REPO_URL" == git@github.com:* ]]; then
+  REPO_URL="https://github.com/${REPO_URL#git@github.com:}"
+fi
+REPO_URL="${REPO_URL%.git}"
+
+echo "Using Argo CD repo URL: $REPO_URL"
+if ! git ls-remote "$REPO_URL" HEAD >/dev/null 2>&1; then
+  echo "ERROR: Argo CD cannot access repository: $REPO_URL"
+  echo "Set a public repo URL and rerun, for example:"
+  echo "  REPO_URL=https://github.com/<your-login>/Inception-of-things ./scripts/install.sh"
+  exit 1
+fi
+
 # ─── Create namespaces ────────────────────────────────────────────────────────
 kubectl apply -f "$CONFS_DIR/namespace.yaml"
 
@@ -65,7 +88,10 @@ echo "Waiting for Argo CD server to be ready..."
 kubectl wait --for=condition=available --timeout=300s deployment/argocd-server -n argocd
 
 # ─── Apply Argo CD Application ────────────────────────────────────────────────
-kubectl apply -f "$CONFS_DIR/argocd-app.yaml"
+TMP_APP_MANIFEST="$(mktemp)"
+sed "s|__REPO_URL__|$REPO_URL|g" "$CONFS_DIR/argocd-app.yaml" > "$TMP_APP_MANIFEST"
+kubectl apply -f "$TMP_APP_MANIFEST"
+rm -f "$TMP_APP_MANIFEST"
 
 # ─── Print summary ───────────────────────────────────────────────────────────
 ARGOCD_PASS="$(kubectl -n argocd get secret argocd-initial-admin-secret \
