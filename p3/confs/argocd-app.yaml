@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: __REPO_URL__
-    targetRevision: HEAD
+    targetRevision: __TARGET_REVISION__
     path: p3/confs/app
   destination:
     server: https://kubernetes.default.svc
