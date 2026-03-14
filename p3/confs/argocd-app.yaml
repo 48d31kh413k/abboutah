@@ -1,7 +1,3 @@
-# FILE: argocd-app.yaml
-# PURPOSE: Register the playground workload in Argo CD so the dev namespace stays synced from Git.
-# USAGE: Applied by scripts/install.sh or manually with kubectl apply -f confs/argocd-app.yaml
-# NOTES: Replace the placeholder repo URL or provide REPO_URL when running the installer.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -12,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/48d31kh413k/Inception-of-things
     targetRevision: HEAD
-    path: confs/
+    path: p3/confs/app
   destination:
     server: https://kubernetes.default.svc
     namespace: dev
@@ -20,3 +16,5 @@ spec:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

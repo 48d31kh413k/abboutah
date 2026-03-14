@@ -1,7 +1,3 @@
-# FILE: deployment.yaml
-# PURPOSE: Define the playground workload and its in-cluster service in the dev namespace.
-# USAGE: Managed by Argo CD from confs/; manual apply remains possible with kubectl apply -f confs/deployment.yaml
-# NOTES: Change the image tag from v1 to v2 to test automated sync and rollout.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
