@@ -1,20 +1,24 @@
 # Inception-of-Things (IoT)
 
-A System Administration project focused on learning Kubernetes fundamentals using K3s, K3d, Vagrant, and Argo CD.
+Inception-of-Things is a System Administration project that models a practical Kubernetes adoption path in three controlled stages: cluster fundamentals, ingress-based service exposure, and GitOps-driven delivery.
 
-##  Overview
+## Overview
 
-This project aims to deepen knowledge in Kubernetes by using K3d and K3s with Vagrant. You will learn how to set up personal virtual machines, configure K3s with Ingress, and implement continuous integration with Argo CD.
+The project is structured to demonstrate how infrastructure maturity evolves:
+- From manually provisioned virtual machines and basic cluster topology
+- To service routing and workload scaling inside Kubernetes
+- To declarative delivery with automated reconciliation through Argo CD
 
-##  Objectives
+The stack combines Vagrant, K3s, K3d, Docker, kubectl, and Argo CD to represent a realistic progression from local infrastructure management to platform operations.
 
-- Set up virtual machines with Vagrant
-- Install and configure K3s in controller and agent modes
-- Deploy applications with K3s Ingress
-- Use K3d for simplified Kubernetes management
-- Implement continuous integration with Argo CD
+## Engineering Intent
 
-##  Project Structure
+- **Operational clarity**: each part isolates one core capability and its validation criteria.
+- **Reproducibility**: infrastructure and deployment artifacts are versioned and deterministic.
+- **Declarative control**: desired state is described in manifests and continuously reconciled.
+- **Production mindset**: naming, networking, access, and rollout behavior are treated as first-class concerns.
+
+## Project Structure
 
 ```
 .
@@ -35,39 +39,49 @@ This project aims to deepen knowledge in Kubernetes by using K3d and K3s with Va
     └── confs/
 ```
 
-## Mandatory Parts
+## Mandatory Scope
 
-### Part 1: K3s and Vagrant
+### Part 1: K3s on Vagrant (Control Plane + Agent)
 
-Set up 2 virtual machines using Vagrant with K3s installed.
+Part 1 establishes the baseline cluster architecture on two virtual machines.
 
-**Requirements:**
-- Use the latest stable version of your chosen distribution
-- Minimal resources: 1 CPU and 512-1024 MB RAM
-- Machine names based on team member login
+**Why this part exists:**
+- It validates node role separation (controller vs agent).
+- It confirms deterministic networking and host-level access.
+- It ensures Kubernetes tooling is available across all nodes for operations.
 
-**Machine Specifications:**
+**Platform constraints:**
+- Latest stable version of the selected Linux distribution
+- Minimal resources per VM: 1 CPU and 512-1024 MB RAM
+- Hostnames derived from team login
+
+**Machine specifications:**
 
 | Machine | Hostname | IP Address | K3s Mode |
 |---------|----------|------------|----------|
 | Server | `<login>S` | 192.168.56.110 | Controller |
 | ServerWorker | `<login>SW` | 192.168.56.111 | Agent |
 
-**Features:**
-- Dedicated IP on primary network interface
-- SSH access without password
-- kubectl installed on both machines
+**Operational characteristics:**
+- Dedicated IP on the primary network interface
+- Passwordless SSH access
+- `kubectl` available on both machines
 
-### Part 2: K3s and Three Simple Applications
+### Part 2: K3s Ingress with Three Applications
 
-Deploy 3 web applications accessible via different HOSTs on a single K3s server.
+Part 2 models service multiplexing through host-based ingress on a single K3s server.
 
-**Requirements:**
-- Single virtual machine with K3s in server mode
+**Why this part exists:**
+- It demonstrates Layer-7 routing with host headers.
+- It validates horizontal scaling behavior on one workload.
+- It proves multiple apps can share one cluster ingress endpoint cleanly.
+
+**Runtime constraints:**
+- Single VM running K3s in server mode
 - Machine name: `<login>S`
-- IP: 192.168.56.110
+- IP address: 192.168.56.110
 
-**Application Routing:**
+**Routing contract:**
 
 | HOST | Application | Replicas |
 |------|-------------|----------|
@@ -75,79 +89,87 @@ Deploy 3 web applications accessible via different HOSTs on a single K3s server.
 | app2.com | Application 2 | 3 |
 | default | Application 3 | 1 |
 
-**Configuration:**
-- Access applications by HOST header to IP 192.168.56.110
-- Configure Ingress for routing
-- Application 2 must have 3 replicas
+**Ingress expectations:**
+- Application access is selected by `HOST` header to 192.168.56.110
+- Ingress resources define routing behavior
+- Application 2 runs with exactly 3 replicas
 
-### Part 3: K3d and Argo CD
+### Part 3: K3d + Argo CD (GitOps Delivery)
 
-Set up a continuous integration pipeline using K3d and Argo CD (without Vagrant).
+Part 3 shifts from VM-centric setup to containerized Kubernetes and declarative continuous delivery.
 
-**Requirements:**
-- Install K3d on your virtual machine
-- Docker must be installed
-- Create an installation script for all necessary packages
+**Why this part exists:**
+- It demonstrates Git as the source of truth for deployment state.
+- It validates automatic reconciliation from repository changes.
+- It introduces environment separation through namespace boundaries.
 
-**Namespaces:**
-1. **argocd** - Dedicated to Argo CD
-2. **dev** - Contains the application deployed by Argo CD
+**Execution baseline:**
+- K3d installed on the VM
+- Docker installed and operational
+- Installation script available for required packages
 
-**Application Deployment:**
-- Use a public GitHub repository with configuration files
-- Repository name must include a team member's login
-- Application must have two versions (v1 and v2) using tags
-- Changes in GitHub repo should trigger automatic updates
+**Namespace model:**
+1. **argocd** - Control namespace for Argo CD
+2. **dev** - Target namespace for the application
 
-**Application Options:**
-1. Use Wil's pre-made application: `wil42/playground` on Docker Hub (port 8888)
-2. Create your own application with a public Docker Hub repository
+**Application delivery model:**
+- Public GitHub repository contains deployment manifests
+- Repository name includes one team member login
+- Two tagged application versions are available (`v1`, `v2`)
+- Repository changes trigger Argo CD sync and rollout updates
 
-**Testing:**
+**Application options:**
+1. Use `wil42/playground` from Docker Hub (port 8888)
+2. Use a custom application image hosted in a public Docker Hub repository
+
+**Verification commands:**
 ```bash
-# Check namespaces
+# Validate namespaces
 kubectl get ns
 
-# Check pods in dev namespace
+# Validate workload presence in dev
 kubectl get pods -n dev
 
-# Verify application version
+# Validate exposed application version
 curl http://localhost:8888/
 ```
 
-## Bonus Part
+## Bonus Scope
 
-Add GitLab to Part 3 setup.
+The bonus introduces local GitLab as the GitOps source while preserving all Part 3 outcomes.
 
-**Requirements:**
-- Latest version of GitLab from official website
-- GitLab must run locally
-- Configure GitLab to work with your cluster
-- Create dedicated namespace: `gitlab`
-- All Part 3 functionality must work with local GitLab
-- Use helm or other tools as needed
+**Why this extension matters:**
+- It validates self-hosted SCM integration with the Kubernetes delivery path.
+- It reduces dependency on external hosted services.
 
-> The bonus part will only be assessed if the mandatory part is flawless.
+**Bonus requirements:**
+- Latest GitLab version from official distribution
+- GitLab running locally
+- Cluster integration configured for GitLab workflows
+- Dedicated `gitlab` namespace
+- Full Part 3 behavior preserved with local GitLab as source
+- Helm or equivalent tooling allowed
 
-## General Guidelines
+> Bonus assessment is valid only when all mandatory parts are fully compliant.
 
-- All work must be done in virtual machines
-- Configuration files organized in folders at repository root
-- Mandatory parts in folders: `p1`, `p2`, `p3`
-- Bonus part in folder: `bonus`
-- Scripts go in `scripts/` folder
-- Configuration files go in `confs/` folder
-- Use any tools for host VM setup and Vagrant provider
+## Delivery Rules
 
-## Technologies
+- All implementation runs in virtual machines
+- Configuration is organized at repository root
+- Mandatory scope lives in `p1`, `p2`, and `p3`
+- Optional scope lives in `bonus`
+- Automation scripts are stored in `scripts/`
+- Kubernetes and related configs are stored in `confs/`
 
-- **Vagrant** - Virtual machine management
-- **K3s** - Lightweight Kubernetes distribution
-- **K3d** - K3s in Docker
-- **Argo CD** - Declarative GitOps continuous delivery
-- **Docker** - Container platform
-- **kubectl** - Kubernetes command-line tool
-- **GitLab** (Bonus) - DevOps platform
+## Technology Roles
+
+- **Vagrant** - deterministic VM provisioning
+- **K3s** - lightweight Kubernetes runtime
+- **K3d** - K3s lifecycle in Docker
+- **Argo CD** - declarative GitOps controller
+- **Docker** - container runtime dependency for K3d
+- **kubectl** - cluster operations interface
+- **GitLab (Bonus)** - self-hosted source control and CI/CD integration point
 
 ## Resources
 
@@ -157,34 +179,34 @@ Add GitLab to Part 3 setup.
 - [Argo CD Documentation](https://argo-cd.readthedocs.io/)
 - [Wil's Playground Application](https://hub.docker.com/r/wil42/playground)
 
-## 🔍 Network Configuration Notes
+## Network Notes
 
-Modern Linux distributions use predictable network interface names (e.g., `enp0s8`, `enp0s9`) instead of `eth0`/`eth1`.
+Modern Linux distributions commonly expose predictable network interface names such as `enp0s8` and `enp0s9`, replacing legacy names like `eth0` and `eth1`.
 
-**Check network configuration:**
+**Reference commands:**
 - Linux: `ip a` or `ip a show <interface_name>`
 - macOS: `ifconfig`
 
-Adapt commands according to your system's actual interface names.
+Interface names are environment-specific and are mapped to the actual host and guest configuration.
 
-## Submission
+## Submission Context
 
-- Submit via Git repository
-- Ensure correct folder and file names
-- Mandatory parts in `p1`, `p2`, `p3` folders
-- Optional bonus in `bonus` folder
-- Evaluation happens on the evaluated group's computer
+- Submission is handled through a Git repository
+- Folder naming and structure are part of the evaluation
+- Mandatory scope remains in `p1`, `p2`, `p3`
+- Bonus scope, when present, remains in `bonus`
+- Evaluation is performed on the assessed group machine
 
-## Important Notes
+## Quality Bar
 
-- Read extensive documentation on K8s, K3s, and K3d
-- Follow modern Vagrant practices
-- Ensure SSH access without passwords
-- Test all configurations before submission
-- The bonus requires a flawless mandatory part
+- Kubernetes, K3s, and K3d documentation usage is expected
+- Vagrant and network configuration follow current best practices
+- Passwordless operational access is functional
+- End-to-end validation is required before assessment
+- Bonus eligibility depends on a flawless mandatory implementation
 
 ---
 
-**Project Date:** March 2026 
+**Project Date:** March 2026  
 **Course:** System Administration  
 **Difficulty:** Intermediate to Advanced
