@@ -6,8 +6,8 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: __REPO_URL__
-    targetRevision: __TARGET_REVISION__
+    repoURL: https://github.com/48d31kh413k/Inception-of-things
+    targetRevision: HEAD
     path: p3/confs/app
   destination:
     server: https://kubernetes.default.svc
