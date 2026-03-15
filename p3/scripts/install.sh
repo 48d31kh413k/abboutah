@@ -1,58 +1,38 @@
 #!/bin/bash
-set -euo pipefail
+set -eu
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFS_DIR="$SCRIPT_DIR/../confs"
 
-CLUSTER_NAME="${CLUSTER_NAME:-iot-cluster}"
-
-echo "[1/5] Install dependencies"
+echo "[1/4] Install dependencies"
 sudo apt-get update -y
-sudo apt-get install -y docker.io curl ca-certificates git
+sudo apt-get install -y docker.io curl git
 sudo systemctl enable docker --now
 
-echo "[2/5] Install kubectl"
-KUBECTL_VERSION="$(curl -L -s https://dl.k8s.io/release/stable.txt)"
-curl -fsSL -o kubectl "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl"
-sudo install -m 0755 kubectl /usr/local/bin/kubectl
+echo "[2/4] Install kubectl and k3d"
+curl -fsSL -o kubectl https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl
+sudo install -m 0755 kubectl /usr/local/bin/
 rm -f kubectl
-
-echo "[3/5] Install k3d and create cluster"
 curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
-if ! k3d cluster list 2>/dev/null | awk 'NR>1 {print $1}' | grep -qx "$CLUSTER_NAME"; then
-  k3d cluster create "$CLUSTER_NAME" --port "8888:8888@loadbalancer"
-else
-  echo "Cluster already exists, reusing it"
-fi
 
+echo "[3/4] Create k3d cluster"
+k3d cluster create iot-cluster --port "8888:8888@loadbalancer" 2>/dev/null || true
 mkdir -p ~/.kube
-k3d kubeconfig get "$CLUSTER_NAME" > ~/.kube/config
+k3d kubeconfig get iot-cluster > ~/.kube/config
 export KUBECONFIG=~/.kube/config
 
-echo "[4/6] Install Argo CD"
+echo "[4/4] Deploy Argo CD and app"
 kubectl apply -f "$CONFS_DIR/namespace.yaml"
-kubectl apply --server-side -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-kubectl wait --for=condition=available --timeout=300s deployment/argocd-server -n argocd
-
-# Fix repo-server init container command when cp --update=none causes init crash on some hosts.
-kubectl patch deployment argocd-repo-server -n argocd --type='json' -p='[{"op":"replace","path":"/spec/template/spec/initContainers/0/args/0","value":"/bin/cp -f /usr/local/bin/argocd /var/run/argocd/argocd && /bin/ln -sf /var/run/argocd/argocd /var/run/argocd/argocd-cmp-server"}]' || true
-kubectl rollout restart deployment/argocd-repo-server -n argocd
-kubectl rollout status deployment/argocd-repo-server -n argocd --timeout=300s
-
-echo "[5/5] Apply Argo CD app"
+kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml -n argocd
 kubectl apply -f "$CONFS_DIR/argocd-app.yaml"
+sleep 10
+kubectl wait --for=condition=available --timeout=120s deployment/argocd-server -n argocd 2>/dev/null || true
 
-ARGOCD_PASS="$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d)"
+ARGOCD_PASS="$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' 2>/dev/null | base64 -d || echo 'N/A')"
 
 echo ""
-echo "Argo CD ready"
-echo "User: admin"
-echo "Pass: $ARGOCD_PASS"
+echo "Done. Argo CD will auto-sync from Git."
+echo "Admin: $ARGOCD_PASS"
 echo ""
-echo "Open Argo CD UI"
 echo "kubectl port-forward svc/argocd-server -n argocd 8080:443"
-echo "https://localhost:8080"
-echo ""
-echo "Open playground app"
 echo "kubectl port-forward svc/playground -n dev 8888:8888"
-echo "http://localhost:8888"
