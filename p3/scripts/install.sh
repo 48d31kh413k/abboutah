@@ -29,13 +29,23 @@ mkdir -p ~/.kube
 k3d kubeconfig get "$CLUSTER_NAME" > ~/.kube/config
 export KUBECONFIG=~/.kube/config
 
-echo "[4/5] Install Argo CD"
+echo "[4/6] Install Argo CD"
 kubectl apply -f "$CONFS_DIR/namespace.yaml"
 kubectl apply --server-side -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 kubectl wait --for=condition=available --timeout=300s deployment/argocd-server -n argocd
 
-echo "[5/5] Apply Argo CD app"
+# Fix repo-server init container command when cp --update=none causes init crash on some hosts.
+kubectl patch deployment argocd-repo-server -n argocd --type='json' -p='[{"op":"replace","path":"/spec/template/spec/initContainers/0/args/0","value":"/bin/cp -f /usr/local/bin/argocd /var/run/argocd/argocd && /bin/ln -sf /var/run/argocd/argocd /var/run/argocd/argocd-cmp-server"}]' || true
+kubectl rollout restart deployment/argocd-repo-server -n argocd
+kubectl rollout status deployment/argocd-repo-server -n argocd --timeout=300s
+
+echo "[5/6] Apply Argo CD app"
 kubectl apply -f "$CONFS_DIR/argocd-app.yaml"
+
+echo "[6/6] Sync app"
+kubectl annotate application playground -n argocd argocd.argoproj.io/refresh=hard --overwrite
+kubectl patch application playground -n argocd --type merge -p '{"operation":{"sync":{"prune":true}}}'
+kubectl rollout status deployment/playground -n dev --timeout=300s
 
 ARGOCD_PASS="$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d)"
 
