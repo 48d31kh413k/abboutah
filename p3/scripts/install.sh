@@ -69,8 +69,10 @@ if [[ "$REPO_URL" == git@github.com:* ]]; then
   REPO_URL="https://github.com/${REPO_URL#git@github.com:}"
 fi
 REPO_URL="${REPO_URL%.git}"
+TARGET_REVISION="${TARGET_REVISION:-HEAD}"
 
 echo "Using Argo CD repo URL: $REPO_URL"
+echo "Using Argo CD target revision: $TARGET_REVISION"
 if ! git ls-remote "$REPO_URL" HEAD >/dev/null 2>&1; then
   echo "ERROR: Argo CD cannot access repository: $REPO_URL"
   echo "Set a public repo URL and rerun, for example:"
@@ -89,7 +91,7 @@ kubectl wait --for=condition=available --timeout=300s deployment/argocd-server -
 
 # ─── Apply Argo CD Application ────────────────────────────────────────────────
 TMP_APP_MANIFEST="$(mktemp)"
-sed "s|__REPO_URL__|$REPO_URL|g" "$CONFS_DIR/argocd-app.yaml" > "$TMP_APP_MANIFEST"
+sed -e "s|__REPO_URL__|$REPO_URL|g" -e "s|__TARGET_REVISION__|$TARGET_REVISION|g" "$CONFS_DIR/argocd-app.yaml" > "$TMP_APP_MANIFEST"
 kubectl apply -f "$TMP_APP_MANIFEST"
 rm -f "$TMP_APP_MANIFEST"
 
