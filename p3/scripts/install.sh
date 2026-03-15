@@ -69,7 +69,21 @@ if [[ "$REPO_URL" == git@github.com:* ]]; then
   REPO_URL="https://github.com/${REPO_URL#git@github.com:}"
 fi
 REPO_URL="${REPO_URL%.git}"
-TARGET_REVISION="${TARGET_REVISION:-HEAD}"
+
+# Choose a stable revision to track unless explicitly provided.
+if [[ -z "${TARGET_REVISION:-}" ]]; then
+  CURRENT_BRANCH="$(git -C "$ROOT_DIR" rev-parse --abbrev-ref HEAD 2>/dev/null || true)"
+  if [[ -n "$CURRENT_BRANCH" && "$CURRENT_BRANCH" != "HEAD" ]]; then
+    TARGET_REVISION="$CURRENT_BRANCH"
+  else
+    REMOTE_DEFAULT="$(git -C "$ROOT_DIR" symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null || true)"
+    TARGET_REVISION="${REMOTE_DEFAULT#origin/}"
+  fi
+fi
+
+if [[ -z "${TARGET_REVISION:-}" ]]; then
+  TARGET_REVISION="main"
+fi
 
 echo "Using Argo CD repo URL: $REPO_URL"
 echo "Using Argo CD target revision: $TARGET_REVISION"
@@ -77,6 +91,12 @@ if ! git ls-remote "$REPO_URL" HEAD >/dev/null 2>&1; then
   echo "ERROR: Argo CD cannot access repository: $REPO_URL"
   echo "Set a public repo URL and rerun, for example:"
   echo "  REPO_URL=https://github.com/<your-login>/Inception-of-things ./scripts/install.sh"
+  exit 1
+fi
+if ! git ls-remote "$REPO_URL" "$TARGET_REVISION" | grep -q .; then
+  echo "ERROR: Revision '$TARGET_REVISION' does not exist in repository: $REPO_URL"
+  echo "Set a valid branch/tag/commit and rerun, for example:"
+  echo "  TARGET_REVISION=main ./scripts/install.sh"
   exit 1
 fi
 
@@ -94,6 +114,35 @@ TMP_APP_MANIFEST="$(mktemp)"
 sed -e "s|__REPO_URL__|$REPO_URL|g" -e "s|__TARGET_REVISION__|$TARGET_REVISION|g" "$CONFS_DIR/argocd-app.yaml" > "$TMP_APP_MANIFEST"
 kubectl apply -f "$TMP_APP_MANIFEST"
 rm -f "$TMP_APP_MANIFEST"
+
+echo "Forcing Argo CD refresh and sync..."
+kubectl annotate application playground -n argocd argocd.argoproj.io/refresh=hard --overwrite
+kubectl patch application playground -n argocd --type merge -p '{"operation":{"sync":{"prune":true}}}'
+
+echo "Waiting for application to become Synced and Healthy..."
+for _ in $(seq 1 60); do
+  SYNC_STATUS="$(kubectl get application playground -n argocd -o jsonpath='{.status.sync.status}' 2>/dev/null || true)"
+  HEALTH_STATUS="$(kubectl get application playground -n argocd -o jsonpath='{.status.health.status}' 2>/dev/null || true)"
+
+  if [[ "$SYNC_STATUS" == "Synced" && "$HEALTH_STATUS" == "Healthy" ]]; then
+    break
+  fi
+
+  sleep 5
+done
+
+FINAL_SYNC_STATUS="$(kubectl get application playground -n argocd -o jsonpath='{.status.sync.status}' 2>/dev/null || true)"
+FINAL_HEALTH_STATUS="$(kubectl get application playground -n argocd -o jsonpath='{.status.health.status}' 2>/dev/null || true)"
+
+if [[ "$FINAL_SYNC_STATUS" != "Synced" || "$FINAL_HEALTH_STATUS" != "Healthy" ]]; then
+  echo "ERROR: Application did not reach Synced/Healthy state in time"
+  echo "Final sync status: $FINAL_SYNC_STATUS"
+  echo "Final health status: $FINAL_HEALTH_STATUS"
+  kubectl get application playground -n argocd -o yaml | grep -E 'repoURL|targetRevision|path:|sync:|revision:|message:|phase:' || true
+  exit 1
+fi
+
+kubectl rollout status deployment/playground -n dev --timeout=180s
 
 # ─── Print summary ───────────────────────────────────────────────────────────
 ARGOCD_PASS="$(kubectl -n argocd get secret argocd-initial-admin-secret \
