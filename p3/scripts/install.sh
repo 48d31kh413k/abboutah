@@ -108,6 +108,10 @@ kubectl apply --server-side -n argocd -f https://raw.githubusercontent.com/argop
 
 echo "Waiting for Argo CD server to be ready..."
 kubectl wait --for=condition=available --timeout=300s deployment/argocd-server -n argocd
+echo "Waiting for Argo CD repo-server to be ready..."
+kubectl wait --for=condition=available --timeout=300s deployment/argocd-repo-server -n argocd
+echo "Waiting for Argo CD application controller to be ready..."
+kubectl wait --for=condition=available --timeout=300s deployment/argocd-application-controller -n argocd
 
 # ─── Apply Argo CD Application ────────────────────────────────────────────────
 TMP_APP_MANIFEST="$(mktemp)"
@@ -123,9 +127,17 @@ echo "Waiting for application to become Synced and Healthy..."
 for _ in $(seq 1 60); do
   SYNC_STATUS="$(kubectl get application playground -n argocd -o jsonpath='{.status.sync.status}' 2>/dev/null || true)"
   HEALTH_STATUS="$(kubectl get application playground -n argocd -o jsonpath='{.status.health.status}' 2>/dev/null || true)"
+  CONDITION_TYPES="$(kubectl get application playground -n argocd -o jsonpath='{.status.conditions[*].type}' 2>/dev/null || true)"
+  CONDITION_MESSAGES="$(kubectl get application playground -n argocd -o jsonpath='{.status.conditions[*].message}' 2>/dev/null || true)"
 
   if [[ "$SYNC_STATUS" == "Synced" && "$HEALTH_STATUS" == "Healthy" ]]; then
     break
+  fi
+
+  if [[ "$SYNC_STATUS" == "Unknown" && -n "$CONDITION_TYPES" ]]; then
+    echo "Argo CD sync is Unknown"
+    echo "Condition types: $CONDITION_TYPES"
+    echo "Condition messages: $CONDITION_MESSAGES"
   fi
 
   sleep 5
