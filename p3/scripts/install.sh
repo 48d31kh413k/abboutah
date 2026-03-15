@@ -39,13 +39,8 @@ kubectl patch deployment argocd-repo-server -n argocd --type='json' -p='[{"op":"
 kubectl rollout restart deployment/argocd-repo-server -n argocd
 kubectl rollout status deployment/argocd-repo-server -n argocd --timeout=300s
 
-echo "[5/6] Apply Argo CD app"
+echo "[5/5] Apply Argo CD app"
 kubectl apply -f "$CONFS_DIR/argocd-app.yaml"
-
-echo "[6/6] Sync app"
-kubectl annotate application playground -n argocd argocd.argoproj.io/refresh=hard --overwrite
-kubectl patch application playground -n argocd --type merge -p '{"operation":{"sync":{"prune":true}}}'
-kubectl rollout status deployment/playground -n dev --timeout=300s
 
 ARGOCD_PASS="$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d)"
 
