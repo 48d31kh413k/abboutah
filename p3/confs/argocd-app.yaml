@@ -1,20 +1,21 @@
-apiVersion: argoproj.io/v1alpha1
-kind: Application
+# Argo CD Application resource definition for GitOps automation
+apiVersion: argoproj.io/v1alpha1  # Argo CD API version
+kind: Application  # Kubernetes resource kind - defines an Argo CD app
 metadata:
-  name: playground
-  namespace: argocd
+  name: playground  # Name of this Argo CD application
+  namespace: argocd  # Lives in argocd namespace (system infrastructure)
 spec:
-  project: default
+  project: default  # Use default Argo project
   source:
-    repoURL: https://github.com/48d31kh413k/Inception-of-things
-    targetRevision: main
-    path: p3/confs/app
+    repoURL: https://github.com/48d31kh413k/Inception-of-things  # GitHub repo containing manifests
+    targetRevision: main  # Track the main branch
+    path: p3/confs/app  # Path to app manifests in the repo
   destination:
-    server: https://kubernetes.default.svc
-    namespace: dev
+    server: https://kubernetes.default.svc  # Target the current cluster
+    namespace: dev  # Deploy to the dev namespace
   syncPolicy:
     automated:
-      prune: true
-      selfHeal: true
+      prune: true  # Auto-delete resources removed from Git
+      selfHeal: true  # Auto-revert manual cluster changes
     syncOptions:
-      - CreateNamespace=true
+      - CreateNamespace=true  # Auto-create dev namespace if missing
