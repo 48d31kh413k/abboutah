@@ -9,6 +9,25 @@ This document explains:
 - **How to** run, test, and troubleshoot end-to-end
 - **Why** certain design decisions were made
 
+## Table of Contents
+
+1. [What Part 3 is doing (The Big Picture)](#1-what-part-3-is-doing-the-big-picture)
+2. [Why each component exists (The Toolchain Explained)](#2-why-each-component-exists-the-toolchain-explained)
+3. [Files and responsibilities (Tour of the Project Layout)](#3-files-and-responsibilities-tour-of-the-project-layout)
+4. [How the install script works (Deep Dive)](#4-how-the-install-script-works-deep-dive-what-runs-when)
+5. [Before running (Pre-Flight Checklist)](#5-before-running-pre-flight-checklist-as-a-senior-would-explain)
+6. [How to run everything (Step-by-Step Initiation)](#6-how-to-run-everything-step-by-step-initiation)
+7. [How to access services (Testing the Setup)](#7-how-to-access-services-testing-the-setup)
+8. [GitOps update demo (Defense Flow)](#8-gitops-update-demo-defense-flow--how-to-prove-it-works)
+9. [Verify all required elements (Checklist for Evaluators)](#9-verify-all-required-elements-checklist-for-evaluators)
+10. [Common issues and fixes (Diagnostic Guide)](#10-common-issues-and-fixes-diagnostic-guide)
+11. [Architecture Overview (How Everything Fits Together)](#11-architecture-overview-how-everything-fits-together)
+12. [Key Concepts Glossary (Learn the Lingo)](#12-key-concepts-glossary-learn-the-lingo)
+13. [Key Takeaways (What You Should Remember)](#13-key-takeaways-what-you-should-remember)
+14. [Further Learning (If You Want to Go Deeper)](#14-further-learning-if-you-want-to-go-deeper)
+15. [Quick Reference Commands](#15-quick-reference-commands)
+16. [Summary for Your Evaluators](#16-summary-for-your-evaluators)
+
 ---
 
 ## 1) What Part 3 is doing (The Big Picture)
