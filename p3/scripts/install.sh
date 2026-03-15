@@ -23,7 +23,7 @@ export KUBECONFIG=~/.kube/config
 
 echo "[4/4] Deploy Argo CD and app"
 kubectl apply -f "$CONFS_DIR/namespace.yaml"
-kubectl apply -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml -n argocd
+kubectl apply --server-side -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml -n argocd 2>&1 | grep -v "Warning:" || true
 kubectl apply -f "$CONFS_DIR/argocd-app.yaml"
 sleep 10
 kubectl wait --for=condition=available --timeout=120s deployment/argocd-server -n argocd 2>/dev/null || true
