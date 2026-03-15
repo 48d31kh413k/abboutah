@@ -61,7 +61,7 @@ DEFAULT_REPO_URL="$(git -C "$ROOT_DIR" remote get-url origin 2>/dev/null || true
 REPO_URL="${REPO_URL:-$DEFAULT_REPO_URL}"
 
 if [[ -z "$REPO_URL" ]]; then
-  REPO_URL="https://github.com/abboutah/Inception-of-things"
+  REPO_URL="https://github.com/48d31kh413k/Inception-of-things"
 fi
 
 # Convert SSH GitHub remotes to HTTPS for Argo CD repo-server access

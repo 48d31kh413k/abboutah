@@ -85,7 +85,7 @@ Open `confs/argocd-app.yaml` and verify:
 - `path` is `p3/confs/app`.
 
 For your project, expected repo URL should be:
-- `https://github.com/abboutah/Inception-of-things`
+- `https://github.com/48d31kh413k/Inception-of-things`
 
 Also verify app image in `confs/app/deployment.yaml`:
 - `wil42/playground:v1`
