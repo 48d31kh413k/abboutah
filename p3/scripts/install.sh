@@ -42,5 +42,14 @@ echo ""  # Blank line
 echo "Done. Argo CD will auto-sync from Git."  # Completion message
 echo "Admin: $ARGOCD_PASS"  # Show admin password for Argo CD
 echo ""  # Blank line
+echo "=== Access from VM ==="
 echo "kubectl port-forward svc/argocd-server -n argocd 8080:443"  # Command to access Argo CD UI
 echo "kubectl port-forward svc/playground -n dev 8888:8888"  # Command to access playground app
+echo ""  # Blank line
+echo "=== Access from local machine (macOS) ==="
+echo "ssh -L 8080:localhost:8080 abboutah@127.0.0.1 -p 2222 -N  # Tunnel for Argo CD"
+echo "ssh -L 8888:localhost:8888 abboutah@127.0.0.1 -p 2222 -N  # Tunnel for playground app"
+echo ""  # Blank line
+echo "Then browse to:"
+echo "  Argo CD: http://localhost:8080"
+echo "  Playground: http://localhost:8888"
