@@ -815,11 +815,17 @@ kubectl describe deployment -n dev playground | grep -i image
 # Image: wil42/playground:v1
 ```
 
+##### SCREENSHOT NEEDED HERE ###
+# **Show:** Deployment showing v1 image
+
 **Also test the endpoint:**
 ```bash
 curl http://localhost:8888/
 # Output: Version: v1
 ```
+
+##### SCREENSHOT NEEDED HERE ###
+# **Show:** curl response showing v1
 
 **Step 2: Edit the deployment file locally**
 ```bash
@@ -849,9 +855,45 @@ git commit -m "chore(p3): switch playground image from v1 to v2"
 # Output shows: 1 file changed, 1 insertion(+), 1 deletion(-)
 ```
 
+##### SCREENSHOT NEEDED HERE ###
+# **Show:** Git commit and the push output to GitHub
+
+**Push to GitHub:**
+```bash
+git push origin main
+```
+
+**Step 4: Watch Argo CD detect and sync the change**
+```bash
+# Monitor the application in Argo CD
+kubectl get application -n argocd
+
+# Watch the status change from Synced to OutOfSync to Synced again
+```
+
+##### SCREENSHOT NEEDED HERE ###
+# **Show:** Argo CD dashboard showing the application going OutOfSync then back to Synced
+
+**Step 5: Verify new version is deployed**
+```bash
+# Check the image tag has changed
+kubectl describe deployment -n dev playground | grep -i image
+# Should show: image: wil42/playground:v2
+```
+
+##### SCREENSHOT NEEDED HERE ###
+# **Show:** Deployment showing v2 image
+
 **Why commit?** Git tracks changes. Argo CD reads Git commits. Uncommitted changes aren't tracked.
 
-**Step 4: Push to GitHub**
+**Step 6: Verify the app is running v2**
+```bash
+curl http://localhost:8888/
+# Output should now show: Version: v2
+```
+
+##### SCREENSHOT NEEDED HERE ###
+# **Show:** curl response showing v2 (final proof that GitOps worked!)
 ```bash
 git push origin main
 ```
@@ -1659,13 +1701,7 @@ kubectl api-resources                     # All Kubernetes resource types
 - **Automation:** No manual `kubectl apply`, no forgotten steps
 - **Disaster Recovery:** Entire infrastructure defined as code, can rebuild in minutes
 
-- Argo CD server not ready in time:
-  Check events and pods:
-
-```bash
-kubectl get pods -n argocd
-kubectl describe pod -n argocd <pod-name>
-```
+**For detailed evaluation steps with screenshots, see [Section 8: GitOps update demo](#8-gitops-update-demo-defense-flow---how-to-prove-it-works) above.**
 
 ## 11) Why this satisfies the project requirement
 

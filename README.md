@@ -1,213 +1,343 @@
-# Inception-of-Things (IoT)
+# Inception of Things (IoT) — Complete Guide
 
-Inception-of-Things is a System Administration project that models a practical Kubernetes adoption path in three controlled stages: cluster fundamentals, ingress-based service exposure, and GitOps-driven delivery.
+Welcome to the **Inception of Things** project! This repository contains a comprehensive three-part Kubernetes learning journey, starting from infrastructure setup and culminating in GitOps automation.
 
-## Overview
+## Project Overview
 
-The project is structured to demonstrate how infrastructure maturity evolves:
-- From manually provisioned virtual machines and basic cluster topology
-- To service routing and workload scaling inside Kubernetes
-- To declarative delivery with automated reconciliation through Argo CD
+This project teaches you Kubernetes fundamentals through hands-on implementation:
+- **Part 1**: Build a multi-node Kubernetes cluster using Vagrant and K3s
+- **Part 2**: Deploy multiple applications with load balancing and Ingress routing
+- **Part 3**: Automate deployments using Argo CD and GitOps
+- **Bonus**: Integrate GitLab into your cluster for complete CI/CD
 
-The stack combines Vagrant, K3s, K3d, Docker, kubectl, and Argo CD to represent a realistic progression from local infrastructure management to platform operations.
+---
 
-## Engineering Intent
+## Quick Navigation
 
-- **Operational clarity**: each part isolates one core capability and its validation criteria.
-- **Reproducibility**: infrastructure and deployment artifacts are versioned and deterministic.
-- **Declarative control**: desired state is described in manifests and continuously reconciled.
-- **Production mindset**: naming, networking, access, and rollout behavior are treated as first-class concerns.
+### [**Part 1: K3s and Vagrant**](p1/README.md)
+Learn infrastructure-as-code and Kubernetes clustering. **For Part 1 detailed documentation, [read here](p1/README.md)**
+
+### [**Part 2: K3s and Three Simple Applications**](p2/README.md)
+Learn deployments, services, and Ingress routing. **For Part 2 detailed documentation, [read here](p2/README.md)**
+
+### [**Part 3: K3d and Argo CD**](p3/README.md)
+Learn GitOps and continuous deployment. **For Part 3 detailed documentation, [read here](p3/README.md)**
+
+### [**Bonus: GitLab Integration** (Advanced)](bonus/README.md)
+Learn self-hosted Git integration with Kubernetes. **For Bonus detailed documentation, [read here](bonus/README.md)**
+
+---
 
 ## Project Structure
 
 ```
 .
-├── p1/                    # Part 1: K3s on Vagrant (Control Plane + Agent)
-│   ├── Vagrantfile
+├── README.md                    # This file — navigation and overview
+├── p1/                          # Part 1: Multi-node K3s cluster
+│   ├── README.md                # [READ THIS for Part 1 details]
+│   ├── Vagrantfile              # VM infrastructure definition
 │   ├── scripts/
+│   │   └── install.sh           # K3s installation script
 │   └── confs/
-├── p2/                    # Part 2: K3s Ingress with 3 Applications
-│   ├── Vagrantfile
+│       └── [configuration files]
+├── p2/                          # Part 2: Multi-app deployment
+│   ├── README.md                # [READ THIS for Part 2 details]
+│   ├── Vagrantfile              # Single-node K3s VM
 │   ├── scripts/
+│   │   └── install.sh           # K3s server setup
 │   └── confs/
-├── p3/                    # Part 3: K3d + Argo CD (GitOps)
+│       ├── namespace.yaml
+│       ├── app1.yaml
+│       ├── app2.yaml
+│       ├── app3.yaml
+│       └── ingress.yaml
+├── p3/                          # Part 3: K3d & Argo CD
+│   ├── README.md                # [READ THIS for Part 3 details]
 │   ├── scripts/
+│   │   └── install.sh           # K3d + Argo CD setup
 │   └── confs/
-└── bonus/                 # BONUS: K3d + GitLab + Argo CD
+│       ├── namespace.yaml
+│       ├── argocd-app.yaml
+│       └── app/
+│           └── deployment.yaml
+└── bonus/                       # Bonus: GitLab integration
+    ├── README.md                # [READ THIS for Bonus details]
     ├── scripts/
+    │   ├── install.sh
+    │   └── gitlab-helper.sh
     └── confs/
+        ├── namespace.yaml
+        ├── gitlab-values.yaml
+        └── app/
+            └── deployment.yaml
 ```
-
-**Note:** The bonus extends Part 3 by adding GitLab as a self-hosted Git repository. It requires Part 3 to be completed first.
-
-## Mandatory Scope
-
-### Part 1: K3s on Vagrant (Control Plane + Agent)
-
-Part 1 establishes the baseline cluster architecture on two virtual machines.
-
-**Why this part exists:**
-- It validates node role separation (controller vs agent).
-- It confirms deterministic networking and host-level access.
-- It ensures Kubernetes tooling is available across all nodes for operations.
-
-**Platform constraints:**
-- Latest stable version of the selected Linux distribution
-- Minimal resources per VM: 1 CPU and 512-1024 MB RAM
-- Hostnames derived from team login
-
-**Machine specifications:**
-
-| Machine | Hostname | IP Address | K3s Mode |
-|---------|----------|------------|----------|
-| Server | `<login>S` | 192.168.56.110 | Controller |
-| ServerWorker | `<login>SW` | 192.168.56.111 | Agent |
-
-**Operational characteristics:**
-- Dedicated IP on the primary network interface
-- Passwordless SSH access
-- `kubectl` available on both machines
-
-### Part 2: K3s Ingress with Three Applications
-
-Part 2 models service multiplexing through host-based ingress on a single K3s server.
-
-**Why this part exists:**
-- It demonstrates Layer-7 routing with host headers.
-- It validates horizontal scaling behavior on one workload.
-- It proves multiple apps can share one cluster ingress endpoint cleanly.
-
-**Runtime constraints:**
-- Single VM running K3s in server mode
-- Machine name: `<login>S`
-- IP address: 192.168.56.110
-
-**Routing contract:**
-
-| HOST | Application | Replicas |
-|------|-------------|----------|
-| app1.com | Application 1 | 1 |
-| app2.com | Application 2 | 3 |
-| default | Application 3 | 1 |
-
-**Ingress expectations:**
-- Application access is selected by `HOST` header to 192.168.56.110
-- Ingress resources define routing behavior
-- Application 2 runs with exactly 3 replicas
-
-### Part 3: K3d + Argo CD (GitOps Delivery)
-
-Part 3 shifts from VM-centric setup to containerized Kubernetes and declarative continuous delivery.
-
-**Why this part exists:**
-- It demonstrates Git as the source of truth for deployment state.
-- It validates automatic reconciliation from repository changes.
-- It introduces environment separation through namespace boundaries.
-
-**Execution baseline:**
-- K3d installed on the VM
-- Docker installed and operational
-- Installation script available for required packages
-
-**Namespace model:**
-1. **argocd** - Control namespace for Argo CD
-2. **dev** - Target namespace for the application
-
-**Application delivery model:**
-- Public GitHub repository contains deployment manifests
-- Repository name includes one team member login
-- Two tagged application versions are available (`v1`, `v2`)
-- Repository changes trigger Argo CD sync and rollout updates
-
-**Application options:**
-1. Use `wil42/playground` from Docker Hub (port 8888)
-2. Use a custom application image hosted in a public Docker Hub repository
-
-**Verification commands:**
-```bash
-# Validate namespaces
-kubectl get ns
-
-# Validate workload presence in dev
-kubectl get pods -n dev
-
-# Validate exposed application version
-curl http://localhost:8888/
-```
-
-## Bonus Scope
-
-The bonus introduces local GitLab as the GitOps source while preserving all Part 3 outcomes.
-
-**Why this extension matters:**
-- It validates self-hosted SCM integration with the Kubernetes delivery path.
-- It reduces dependency on external hosted services.
-
-**Bonus requirements:**
-- Latest GitLab version from official distribution
-- GitLab running locally
-- Cluster integration configured for GitLab workflows
-- Dedicated `gitlab` namespace
-- Full Part 3 behavior preserved with local GitLab as source
-- Helm or equivalent tooling allowed
-
-> Bonus assessment is valid only when all mandatory parts are fully compliant.
-
-## Delivery Rules
-
-- All implementation runs in virtual machines
-- Configuration is organized at repository root
-- Mandatory scope lives in `p1`, `p2`, and `p3`
-- Optional scope lives in `bonus`
-- Automation scripts are stored in `scripts/`
-- Kubernetes and related configs are stored in `confs/`
-
-## Technology Roles
-
-- **Vagrant** - deterministic VM provisioning
-- **K3s** - lightweight Kubernetes runtime
-- **K3d** - K3s lifecycle in Docker
-- **Argo CD** - declarative GitOps controller
-- **Docker** - container runtime dependency for K3d
-- **kubectl** - cluster operations interface
-- **GitLab (Bonus)** - self-hosted source control and CI/CD integration point
-
-## Resources
-
-- [K3s Documentation](https://docs.k3s.io/)
-- [K3d Documentation](https://k3d.io/)
-- [Vagrant Documentation](https://www.vagrantup.com/docs)
-- [Argo CD Documentation](https://argo-cd.readthedocs.io/)
-- [Wil's Playground Application](https://hub.docker.com/r/wil42/playground)
-
-## Network Notes
-
-Modern Linux distributions commonly expose predictable network interface names such as `enp0s8` and `enp0s9`, replacing legacy names like `eth0` and `eth1`.
-
-**Reference commands:**
-- Linux: `ip a` or `ip a show <interface_name>`
-- macOS: `ifconfig`
-
-Interface names are environment-specific and are mapped to the actual host and guest configuration.
-
-## Submission Context
-
-- Submission is handled through a Git repository
-- Folder naming and structure are part of the evaluation
-- Mandatory scope remains in `p1`, `p2`, `p3`
-- Bonus scope, when present, remains in `bonus`
-- Evaluation is performed on the assessed group machine
-
-## Quality Bar
-
-- Kubernetes, K3s, and K3d documentation usage is expected
-- Vagrant and network configuration follow current best practices
-- Passwordless operational access is functional
-- End-to-end validation is required before assessment
-- Bonus eligibility depends on a flawless mandatory implementation
 
 ---
 
-**Project Date:** March 2026  
-**Course:** System Administration  
-**Difficulty:** Intermediate to Advanced
+## Part Details Summary
+
+### Part 1: K3s and Vagrant
+
+**What you'll learn:** Infrastructure-as-code, Kubernetes clustering, multi-node networking
+
+**Platform constraints:**
+- Latest stable Linux distribution
+- Minimal resources: 1 CPU and 512-1024 MB RAM per VM
+- Two machines: `{login}S` (192.168.56.110) and `{login}SW` (192.168.56.111)
+- Passwordless SSH access
+- K3s in controller/agent mode
+
+**Expected outcome:** 2-node Kubernetes cluster ready for deployment
+
+**For detailed setup, architecture, troubleshooting, and evaluation checklist → [Read Part 1 README](p1/README.md)**
+
+---
+
+### Part 2: K3s and Three Applications
+
+**What you'll learn:** Deployments, Services, Ingress routing, load balancing, self-healing
+
+**Runtime constraints:**
+- Single VM running K3s in server mode
+- IP: 192.168.56.110
+- 3 applications deployed
+- app2 with 3 replicas for load balancing
+
+**Routing contract:**
+| Host | App | Replicas |
+|------|-----|----------|
+| app1.com | App 1 | 1 |
+| app2.com | App 2 | 3 |
+| (default) | App 3 | 1 |
+
+**Expected outcome:** Multi-app cluster with Ingress-based routing
+
+**For detailed setup, manifests, testing, and evaluation checklist → [Read Part 2 README](p2/README.md)**
+
+---
+
+### Part 3: K3d and Argo CD
+
+**What you'll learn:** GitOps, continuous deployment, Git-driven automation, declarative infrastructure
+
+**Execution baseline:**
+- K3d installed on the host machine
+- Docker installed and operational
+- Public GitHub repository with deployment manifests
+- Two application versions (v1, v2)
+
+**Architecture:**
+- `argocd` namespace for Argo CD
+- `dev` namespace for the application
+- Automatic sync when GitHub repository is updated
+- Application versioning with Docker tags
+
+**Expected outcome:** GitOps-driven deployment with automatic sync from GitHub
+
+**For detailed setup, GitHub integration, GitOps workflow, and evaluation checklist → [Read Part 3 README](p3/README.md)**
+
+---
+
+### Bonus: GitLab Integration
+
+**What you'll learn:** Self-hosted Git, enterprise GitOps, Helm deployment
+
+**Requirements:**
+- Latest GitLab from official distribution
+- GitLab running locally in the cluster
+- Full Part 3 functionality preserved
+- Dedicated `gitlab` namespace
+
+**Eligibility:** Only evaluated if all mandatory parts (1, 2, 3) are flawless
+
+**For detailed setup, GitLab configuration, and troubleshooting → [Read Bonus README](bonus/README.md)**
+
+---
+
+## Learning Path
+
+### For Beginners (New to Kubernetes)
+**Recommended order:** Part 1 → Part 2 → Part 3 → Bonus
+
+Start with [Part 1](p1/README.md) to understand cluster architecture, then progress through [Part 2](p2/README.md) to learn application deployment, [Part 3](p3/README.md) for automation, and finish with [Bonus](bonus/README.md) for advanced concepts.
+
+### For Intermediate Users (Familiar with Kubernetes)
+**Recommended order:** Part 2 → Part 3 → Bonus
+
+Skip Part 1 or review it quickly, then focus on [Part 2](p2/README.md) for Ingress and routing, [Part 3](p3/README.md) for GitOps, and [Bonus](bonus/README.md) for self-hosted Git integration.
+
+### For Advanced Users (Kubernetes experts)
+**Jump to:** [Part 3](p3/README.md) & [Bonus](bonus/README.md)
+
+Focus on the advanced topics: Argo CD patterns, GitOps best practices, and complex GitLab integration.
+
+---
+
+## System Requirements
+
+- **Vagrant** (v2.3.0+)
+- **VirtualBox, VMware, or Parallels** (VM provider)
+- **Docker** (for Part 3 & Bonus)
+- **kubectl** (optional, can run inside VMs)
+- **Git** (for cloning this repo)
+- **2-4 GB RAM** minimum (4+ GB recommended)
+- **20-50 GB free disk space** (depending on which parts you complete)
+
+### Operating Systems Supported
+- macOS (Intel & Apple Silicon)
+- Linux (Ubuntu, Debian, CentOS, Fedora)
+- Windows (with WSL2 + VirtualBox)
+
+---
+
+## Quick Start (TL;DR)
+
+### Part 1
+```bash
+cd p1
+vagrant up
+vagrant ssh YOUR_LOGINS
+kubectl get nodes  # Should show 2 nodes
+```
+
+### Part 2
+```bash
+cd p2
+vagrant up
+kubectl apply -f confs/
+kubectl get ingress  # Should show routing rules
+```
+
+### Part 3
+```bash
+cd p3
+./scripts/install.sh
+# Push confs to GitHub, Argo CD will auto-deploy
+```
+
+---
+
+## Key Concepts Glossary
+
+### Core Kubernetes Terms
+
+**Pod**: The smallest deployable unit; usually contains one container.
+
+**Deployment**: A controller that ensures N replicas of your pod are always running.
+
+**Service**: A stable endpoint for accessing pods (abstracts away IP churn).
+
+**Ingress**: Routes external HTTP(S) traffic into the cluster based on hostname/path.
+
+**Namespace**: Virtual cluster within the physical cluster (resource isolation).
+
+**kubectl**: Command-line tool for managing your Kubernetes cluster.
+
+### Project-Specific Terms
+
+**K3s**: Lightweight Kubernetes distribution (single binary, minimal dependencies).
+
+**K3d**: K3s running inside Docker containers (perfect for local development).
+
+**Argo CD**: GitOps controller that automatically syncs your cluster with Git.
+
+**Vagrant**: Infrastructure-as-code tool for automating VM creation.
+
+**GitOps**: Practice of using Git as the single source of truth for infrastructure.
+
+---
+
+## Troubleshooting Quick Links
+
+### [Part 1 Troubleshooting](p1/README.md#7-common-issues-and-fixes-troubleshooting)
+- Vagrant hangs on `vagrant up`
+- VMs created but K3s didn't install
+- `kubectl get nodes` shows only 1 node
+
+### [Part 2 Troubleshooting](p2/README.md#8-common-issues-and-fixes-troubleshooting)
+- Ingress requests get 404
+- app2 shows fewer than 3 replicas
+- Cannot access services from host machine
+
+### [Part 3 Troubleshooting](p3/README.md#10-common-issues-and-fixes-diagnostic-guide)
+- Argo CD status is Unknown
+- Application not syncing
+- Port-forward returns NotFound
+
+---
+
+## Important  Criteria
+
+**Part 1 Checklist:**
+- ✅ 2 VMs created with correct names and IPs
+- ✅ K3s cluster with 2 nodes both Ready
+- ✅ Passwordless SSH working on both machines
+- ✅ kubectl can query the cluster
+
+**Part 2 Checklist:**
+- ✅ 1 VM running K3s in server mode
+- ✅ 3 applications deployed (app1, app2, app3)
+- ✅ app2 has exactly 3 replicas running
+- ✅ Ingress routing to correct apps based on hostname
+- ✅ Default backend working for unknown hosts
+
+**Part 3 Checklist:**
+- ✅ K3d cluster running locally
+- ✅ Argo CD managing a GitHub repository
+- ✅ 2 namespaces created: argocd and dev
+- ✅ Application versioning with v1 and v2 tags
+- ✅ GitOps sync working (change Git → cluster updates automatically)
+
+
+## Additional Resources
+
+### Official Documentation
+- [Kubernetes Docs](https://kubernetes.io/docs/)
+- [K3s Documentation](https://docs.k3s.io/)
+- [K3d Documentation](https://k3d.io/)
+- [Argo CD Documentation](https://argo-cd.readthedocs.io/)
+- [Vagrant Documentation](https://www.vagrantup.com/docs)
+- [Wil's Playground Application](https://hub.docker.com/r/wil42/playground)
+
+### Learning Resources
+- [Kubectl cheat sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
+- [K3s vs K3d vs Kubernetes](https://docs.k3s.io/)
+- [GitOps Guide](https://www.gitops.tech/)
+
+---
+
+## Tips for Success
+
+1. **Read the full README for each part** before starting—not just the quick start
+2. **Understand concepts** before copy-pasting commands
+3. **Keep logs handy**: `journalctl -u k3s`, `kubectl logs`, `kubectl describe pod`
+4. **Test incrementally**: After each major step, verify it worked
+5. **Use verbose flags**: `kubectl get nodes -o wide`, `vagrant up --verbose`
+6. **Document your setup**: Note your login, IP addresses, hostnames for reference
+7. **Screenshots matter**: Take them as you go, not at the end
+
+---
+
+## Getting Help
+
+- **Check the Troubleshooting section** in each part's README first
+- **Review the architecture diagrams** to understand component relationships
+- **Read error messages carefully**—Kubernetes and Vagrant provide helpful diagnostics
+- **Check system logs**: `journalctl`, `dmesg`, `docker logs`
+- **Google the error message**—chances are someone else hit it
+
+---
+
+## Starting Your Journey
+
+→ **[Start with Part 1 README](p1/README.md)** if you're new  
+→ **[Jump to Part 2 README](p2/README.md)** if you have Kubernetes experience  
+→ **[Go to Part 3 README](p3/README.md)** if you want GitOps right now  
+
+Good luck! 🚀
+
+---
+
+**Project**: Inception of Things (IoT) — System Administration  
+**Difficulty**: Intermediate to Advanced  
+**Date**: March 2026

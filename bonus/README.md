@@ -48,6 +48,9 @@ This bonus **extends Part 3** by adding **GitLab** as a local, self-hosted Git r
 The script will add to your existing K3d cluster:
 - Create `gitlab` namespace with GitLab deployment
 - Create additional port mappings for GitLab
+
+##### SCREENSHOT NEEDED HERE ###
+# **Show:** Installation script output showing GitLab deployed and namespaces created
 - Deploy GitLab using Helm
 - Reconfigure Argo CD to sync from GitLab instead of GitHub
 - Output new access credentials and commands
@@ -104,11 +107,17 @@ Then from your Mac browser:
    - Username: `root`
    - Password: From install.sh output
 
+##### SCREENSHOT NEEDED HERE ###
+# **Show:** GitLab dashboard logged in and accessible
+
 2. **Create a new project:**
    - Click "New project"
    - Name: `inception-of-things` (or your preferred name)
    - Visibility: Public (required for Argo CD to access)
    - Initialize with README
+
+##### SCREENSHOT NEEDED HERE ###
+# **Show:** GitLab project created with visibility set to Public
 
 3. **Mirror your project:**
    ```bash
@@ -142,13 +151,22 @@ This setup follows the same GitOps principles as Part 3, but with GitLab as the 
    git push
    ```
 
+##### SCREENSHOT NEEDED HERE ###
+# **Show:** Git push output showing commit pushed to local GitLab
+
 2. **Argo CD auto-syncs within 3 minutes**
+
+##### SCREENSHOT NEEDED HERE ###
+# **Show:** Argo CD dashboard showing application transitioning from OutOfSync to Synced
 
 3. **Verify the update:**
    ```bash
    curl http://localhost:8888/
    # Should return: {"status":"ok", "message": "v2"}
    ```
+
+##### SCREENSHOT NEEDED HERE ###
+# **Show:** curl response showing v2 (proves local GitLab GitOps works!)
 
 ## Managing Self-Signed Certificates
 
@@ -206,6 +224,8 @@ By completing this bonus:
 - ✅ Integrate local Git repositories with Argo CD
 - ✅ Manage certificate trust between services
 - ✅ Master GitOps with a production-like setup
+
+**For detailed setup and verification steps with screenshots, see the sections above.**
 
 ## References
 
