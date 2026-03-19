@@ -14,7 +14,7 @@ sudo systemctl enable docker --now  # Enable and start Docker service
 
 # Phase 2: Install Kubernetes tools
 echo "[2/4] Install kubectl and k3d"
-curl -fsSL -o kubectl https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl  # Download kubectl
+curl -fsSL -o kubectl https://dl.k8s.io/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl  # Download kubectl
 sudo install -m 0755 kubectl /usr/local/bin/  # Install kubectl to PATH
 rm -f kubectl  # Clean up kubectl binary
 curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash  # Install k3d
