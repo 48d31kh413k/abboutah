@@ -1,0 +1,27 @@
+# Argo CD Application resource for GitLab integration
+# This example demonstrates how to configure Argo CD to work with a local GitLab instance
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: playground-gitlab
+  namespace: argocd
+spec:
+  project: default
+  source:
+    # Configure this to point to your GitLab repository
+    # Example: https://gitlab.local/root/iot-project (or your username)
+    repoURL: https://gitlab.local/root/inception-of-things.git
+    targetRevision: main
+    path: bonus/confs/app
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+  # Note: If your GitLab instance uses self-signed certificates,
+  # you may need to add the GitLab certificate to Argo CD's trusted CA list
+  # Run: kubectl patch cm argocd-ssh-known-hosts-cm -n argocd ...

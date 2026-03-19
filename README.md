@@ -22,22 +22,23 @@ The stack combines Vagrant, K3s, K3d, Docker, kubectl, and Argo CD to represent 
 
 ```
 .
-├── p1/
+├── p1/                    # Part 1: K3s on Vagrant (Control Plane + Agent)
 │   ├── Vagrantfile
 │   ├── scripts/
 │   └── confs/
-├── p2/
+├── p2/                    # Part 2: K3s Ingress with 3 Applications
 │   ├── Vagrantfile
 │   ├── scripts/
 │   └── confs/
-├── p3/
+├── p3/                    # Part 3: K3d + Argo CD (GitOps)
 │   ├── scripts/
 │   └── confs/
-└── bonus/
-    ├── Vagrantfile
+└── bonus/                 # BONUS: K3d + GitLab + Argo CD
     ├── scripts/
     └── confs/
 ```
+
+**Note:** The bonus extends Part 3 by adding GitLab as a self-hosted Git repository. It requires Part 3 to be completed first.
 
 ## Mandatory Scope
 

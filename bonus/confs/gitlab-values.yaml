@@ -1,0 +1,49 @@
+# Minimal GitLab Helm Chart values for K3d local deployment
+global:
+  host: gitlab.local
+  https: false
+  ingress:
+    enabled: false
+
+gitlab:
+  webservice:
+    replicaCount: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+gitlab-runner:
+  enabled: false
+
+postgresql:
+  enabled: true
+  auth:
+    password: "gitlab-postgres-password"
+  primary:
+    persistence:
+      enabled: false
+
+redis:
+  enabled: true
+  replica:
+    replicaCount: 0
+  master:
+    persistence:
+      enabled: false
+
+prometheus:
+  enabled: false
+
+certmanager:
+  enabled: false
+
+nginx-ingress:
+  enabled: false
+
+registry:
+  enabled: true
+  replicaCount: 1

@@ -30,6 +30,12 @@ This document explains:
 
 ---
 
+## 📌 Bonus: GitLab Integration
+
+After completing Part 3, you can extend your setup with the **Bonus** to replace GitHub with a self-hosted GitLab instance. See `../bonus/README.md` for details.
+
+---
+
 ## 1) What Part 3 is doing (The Big Picture)
 
 **The Problem:** In traditional deployments, you SSH into a server, run manual commands, and hope everything works. If your teammates make changes elsewhere, you don't know. Chaos.

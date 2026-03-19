@@ -1,0 +1,18 @@
+---
+# Namespace for GitLab
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gitlab
+---
+# Namespace for Argo CD
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argocd
+---
+# Namespace for development applications
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev
