@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: playground  # Container name
-          image: wil42/playground:v2  # Docker image to run
+          image: wil42/playground:v1  # Docker image to run
           imagePullPolicy: Always  # Always pull the latest image
           ports:
             - containerPort: 8888  # Container listens on port 8888
