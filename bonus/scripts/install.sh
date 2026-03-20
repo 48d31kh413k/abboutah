@@ -9,20 +9,12 @@ CONFS_DIR="$SCRIPT_DIR/../confs"
 # Phase 1: Install system dependencies
 echo "[1/6] Install dependencies"
 sudo apt-get update -y
-sudo apt-get install -y docker.io curl git wget
+sudo apt-get install -y docker.io curl git wget kubectl helm
 sudo systemctl enable docker --now
 
 # Phase 2: Install Kubernetes tools and Helm
-echo "[2/6] Install kubectl, k3d, and helm"
-curl -fsSL -o kubectl https://dl.k8s.io/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
-sudo install -m 0755 kubectl /usr/local/bin/
-rm -f kubectl
-
-# Install k3d
+echo "[2/6] Install k3d"
 curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
-
-# Install helm
-curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
 # Phase 3: Create local Kubernetes cluster
 echo "[3/6] Create k3d cluster"
@@ -83,12 +75,12 @@ echo "=== Playground App (VM) ==="
 echo "kubectl port-forward svc/playground -n dev 8888:8888 &"
 echo ""
 echo "=== SSH Tunnels for Local Machine (macOS) ==="
-echo "ssh -L 443:localhost:443 root@127.0.0.1 -p 2222 -N  # GitLab"
+echo "ssh -L 8443:localhost:443 root@127.0.0.1 -p 2222 -N  # GitLab"
 echo "ssh -L 8080:localhost:8080 root@127.0.0.1 -p 2222 -N  # Argo CD"
 echo "ssh -L 8888:localhost:8888 root@127.0.0.1 -p 2222 -N  # Playground"
 echo ""
 echo "Then browse to:"
-echo "  GitLab: https://localhost"
+echo "  GitLab: https://localhost:8443"
 echo "  Argo CD: http://localhost:8080"
 echo "  Playground: http://localhost:8888"
 echo "=========================================="

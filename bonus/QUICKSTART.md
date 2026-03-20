@@ -33,7 +33,7 @@ chmod +x install.sh
 
 Terminal 1 (GitLab):
 ```bash
-ssh -L 443:localhost:443 root@127.0.0.1 -p 2222 -N
+ssh -L 8443:localhost:443 root@127.0.0.1 -p 2222 -N
 ```
 
 Terminal 2 (Argo CD):
@@ -47,7 +47,7 @@ ssh -L 8888:localhost:8888 root@127.0.0.1 -p 2222 -N
 ```
 
 **5. In your browser:**
-- GitLab: `https://localhost`
+- GitLab: `https://localhost:8443`
 - Argo CD: `http://localhost:8080`
 - Playground: `http://localhost:8888`
 
