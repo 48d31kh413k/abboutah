@@ -40,6 +40,9 @@ redis:
 prometheus:
   enabled: false
 
+certmanager-issuer:
+  email: admin@gitlab.local
+
 nginx-ingress:
   enabled: false
 
