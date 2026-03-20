@@ -43,10 +43,10 @@ certmanager:
 
 certmanager-issuer:
   email: admin@gitlab.local
+  enabled: false
 
 nginx-ingress:
   enabled: false
 
 registry:
-  enabled: true
-  replicaCount: 1
+  enabled: false
