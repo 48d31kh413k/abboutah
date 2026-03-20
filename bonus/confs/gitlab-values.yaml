@@ -30,7 +30,7 @@ postgresql:
       enabled: false
 
 redis:
-  enabled: true
+  install: true
   replica:
     replicaCount: 0
   master:
