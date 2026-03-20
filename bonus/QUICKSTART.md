@@ -6,6 +6,7 @@
 - K3d cluster with Argo CD already set up
 - kubectl, k3d, and Helm already installed
 - VM is running and accessible
+- **⚠️ At least 5GB free disk space on VM** (GitLab + Argo CD require significant space)
 
 ## 5-Minute Setup
 
@@ -107,6 +108,7 @@ kubectl patch app playground-gitlab -n argocd -p '{"metadata":{"annotations":{"a
 
 | Issue | Solution |
 |-------|----------|
+| Disk space full (pods won't start) | On VM run: `k3d cluster delete iot-cluster` then `docker system prune -a -f --volumes && docker volume rm $(docker volume ls -q) 2>/dev/null \|\| true` then `df -h` to verify. Need at least 5GB free. Then reinstall. |
 | Port already in use | Edit `install.sh` to use different ports |
 | GitLab won't start | Wait 3-5 minutes, check `kubectl logs -n gitlab` |
 | Argo CD can't access GitLab | Ensure repository URL is correct and public |
