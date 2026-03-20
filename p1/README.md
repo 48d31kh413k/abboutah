@@ -21,7 +21,7 @@ This document explains:
 8. [Architecture Overview (Cluster Topology)](#8-architecture-overview-cluster-topology)
 9. [Key Concepts (Learning the Fundamentals)](#9-key-concepts-learning-the-fundamentals)
 10. [Quick Reference Commands](#10-quick-reference-commands)
-11. [Summary for Your Evaluators](#11-summary-for-your-evaluators)
+
 
 ---
 
@@ -451,63 +451,6 @@ systemctl status k3s          # Check K3s service status
 systemctl status k3s-agent    # Check agent status
 journalctl -u k3s -n 50       # Last 50 lines of K3s logs
 ```
-
----
-
-## 11) Summary for Your Evaluators
-
-**What to show during evaluation:**
-
-1. **Vagrant status**
-   ```
-   vagrant status
-   # Show: Both VMs running
-   ```
-   ##### SCREENSHOT NEEDED HERE ###
-   # Capture: `vagrant status` showing both VMs as "running"
-
-2. **Cluster nodes**
-   ```bash
-   vagrant ssh YOUR_LOGINS_S
-   kubectl get nodes
-   # Show: 2 nodes, both Ready, one control-plane/master role
-   ```
-   ##### SCREENSHOT NEEDED HERE ###
-   # Capture: `kubectl get nodes` output showing both nodes Ready
-
-3. **Network connectivity**
-   ```bash
-   vagrant ssh YOUR_LOGINS_S
-   ping 192.168.56.111
-   # Show: Ping successful
-   
-   ip a
-   # Show: Correct IPs (110 on server, 111 on worker)
-   ```
-   ##### SCREENSHOT NEEDED HERE ###
-   # Capture: `ip a` output from both VMs showing correct IPs (110 and 111)
-
-4. **Passwordless SSH**
-   ```bash
-   vagrant ssh YOUR_LOGINS_S
-   # Show: No password prompt
-   vagrant ssh YOUR_LOGINS_SW
-   # Show: No password prompt
-   ```
-   ##### SCREENSHOT NEEDED HERE ###
-   # Capture: SSH login without password prompt on both VMs
-
-5. **K3s systemd services**
-   ```bash
-   vagrant ssh YOUR_LOGINS_S
-   systemctl status k3s
-   
-   vagrant ssh YOUR_LOGINS_SW
-   systemctl status k3s-agent
-   # Show: Both active (running)
-   ```
-   ##### SCREENSHOT NEEDED HERE ###
-   # Capture: systemctl status output from both machines showing active (running)
 
 ---
 

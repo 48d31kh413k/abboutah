@@ -28,6 +28,10 @@ kubeconfig
 *.env
 .envrc
 
+# Study and evaluation guides (not tracked in git)
+EVALUATION_GUIDE.md
+ANSWER_GUIDE.md
+
 # K3s/K3d
 k3s.yaml
 k3d-registry/

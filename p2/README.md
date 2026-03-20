@@ -22,7 +22,6 @@ This document explains:
 9. [Architecture Overview (Multi-App Topology)](#9-architecture-overview-multi-app-topology)
 10. [Key Concepts (Understanding Deployments & Ingress)](#10-key-concepts-understanding-deployments--ingress)
 11. [Quick Reference Commands](#11-quick-reference-commands)
-12. [Summary for Your Evaluators](#12-summary-for-your-evaluators)
 
 ---
 
@@ -765,86 +764,6 @@ kubectl apply -f /path/to/confs/          # Apply all files in folder
 kubectl get events -n my-apps                   # Recent cluster events
 kubectl get all -n my-apps                      # All resources in namespace
 ```
-
----
-
-## 12) Summary for Your Evaluators
-
-**What to show during evaluation:**
-
-1. **VM running with correct specs**
-   ```bash
-   vagrant status
-   # Show: YOUR_LOGINS running
-   vagrant ssh YOUR_LOGINS
-   hostname && ip a show enp0s8
-   # Show: Correct hostname and 192.168.56.110 IP
-   ```
-   ##### SCREENSHOT NEEDED HERE ###
-   # Capture: `vagrant status` and VM details showing correct hostname and IP
-
-2. **All 3 apps deployed**
-   ```bash
-   kubectl get deployments -n my-apps
-   # Show: 3 deployments (app1, app2, app3)
-   ```
-   ##### SCREENSHOT NEEDED HERE ###
-   # Capture: `kubectl get deployments` showing all 3 apps with READY status
-
-3. **app2 has 3 replicas**
-   ```bash
-   kubectl get pods -n my-apps
-   # Show: 3 pods for app2, 1 each for app1 and app3
-   ```
-   ##### SCREENSHOT NEEDED HERE ###
-   # Capture: `kubectl get pods` showing app2 with 3 pod instances running
-
-4. **Ingress rules working**
-   ```bash
-   kubectl get ingress -n my-apps
-   # Show: Ingress with rules for app1.com, app2.com, app3.com
-   ```
-   ##### SCREENSHOT NEEDED HERE ###
-   # Capture: `kubectl get ingress` showing configured rules and assigned IP
-
-5. **Load-balancing each host correctly**
-   ```bash
-   # Inside VM or from host (if /etc/hosts set):
-   curl -H "Host: app1.com" http://192.168.56.110/
-   # Show: app1 response
-   
-   curl -H "Host: app2.com" http://192.168.56.110/
-   # Show: app2 response (run multiple times to show load-balancing)
-   
-   curl http://192.168.56.110/
-   # Show: app3 response (default backend)
-   ```
-   ##### SCREENSHOT NEEDED HERE ###
-   # Capture: curl requests showing different apps responding to different hosts
-
-6. **Browser access (optional, if `/etc/hosts` set up)**
-   ```bash
-   # Open browser
-   # Navigate to http://app1.com
-   # Show: app1 page displayed
-   # Navigate to http://app2.com
-   # Show: app2 page
-   # Navigate to http://app3.com or any other host
-   # Show: app3 page
-   ```
-   ##### SCREENSHOT NEEDED HERE ###
-   # Capture: Browser screenshots of app1.com, app2.com, and app3.com pages
-
-7. **Self-healing demo (bonus)**
-   ```bash
-   # Delete a pod
-   kubectl delete pod app2-deployment-xxxxx -n my-apps
-   # Immediately list pods
-   kubectl get pods -n my-apps
-   # Show: New pod being created to replace deleted one
-   ```
-   ##### SCREENSHOT NEEDED HERE ###
-   # Capture: Pod deletion and automatic recreation by Kubernetes
 
 ---
 
