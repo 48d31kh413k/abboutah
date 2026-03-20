@@ -4,6 +4,8 @@ global:
   https: false
   ingress:
     enabled: false
+  certManager:
+    enabled: false
 
 gitlab:
   webservice:
@@ -36,13 +38,6 @@ redis:
       enabled: false
 
 prometheus:
-  enabled: false
-
-certmanager:
-  enabled: false
-
-certmanager-issuer:
-  email: admin@gitlab.local
   enabled: false
 
 nginx-ingress:
