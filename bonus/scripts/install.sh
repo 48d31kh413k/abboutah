@@ -9,12 +9,16 @@ CONFS_DIR="$SCRIPT_DIR/../confs"
 # Phase 1: Install system dependencies
 echo "[1/6] Install dependencies"
 sudo apt-get update -y
-sudo apt-get install -y docker.io curl git wget kubectl helm
+sudo apt-get install -y docker.io curl git wget kubectl
 sudo systemctl enable docker --now
 
 # Phase 2: Install Kubernetes tools and Helm
-echo "[2/6] Install k3d"
+echo "[2/6] Install k3d and helm"
+# Install k3d
 curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
+
+# Install helm
+curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
 # Phase 3: Create local Kubernetes cluster
 echo "[3/6] Create k3d cluster"
