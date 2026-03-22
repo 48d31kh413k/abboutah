@@ -413,7 +413,7 @@ A "node" in Kubernetes is a machine (VM or physical) that runs containers.
 The smallest deployable unit in Kubernetes. Usually contains 1 container (but can have more).
 
 ### kubelet
-A small agent running on every node. It talks to the control plane and starts/stops containers.
+Kubelet is a lightweight agent that runs on each node, communicating with the control plane to manage container lifecycle (start, stop, and monitor containers).
 
 ### etcd
 A distributed database where Kubernetes stores all its state (node info, pod definitions, secrets, etc.).
