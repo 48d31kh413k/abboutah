@@ -159,7 +159,7 @@ Order matters: You must install packages before running K3s scripts.
 ## 5) How to run everything (Step-by-Step)
 
 ### Prerequisites
-- Vagrant installed (`brew install vagrant` or download from hashicorp.com)
+- Vagrant installed ([download here](https://developer.hashicorp.com/vagrant/install))
 - VirtualBox, VMware, or Parallels installed (for VM hosting)
 - 2-4 GB free RAM (for two VMs)
 - 10+ GB free disk space
