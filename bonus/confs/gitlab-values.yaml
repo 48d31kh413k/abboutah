@@ -1,4 +1,4 @@
-# Minimal GitLab Helm Chart values for K3d local deployment
+# Minimal GitLab Helm Chart values for K3d local deployment - Lightweight Configuration
 global:
   host: gitlab.local
   https: false
@@ -8,19 +8,44 @@ global:
     enabled: false
 
 gitlab:
+  # Minimize webservice
   webservice:
     replicaCount: 1
     resources:
       requests:
-        cpu: 100m
-        memory: 256Mi
+        cpu: 50m
+        memory: 128Mi
       limits:
-        cpu: 500m
-        memory: 512Mi
+        cpu: 200m
+        memory: 256Mi
+    minReplicas: 1
+    maxReplicas: 1
+  
+  # Minimal sidekiq
+  sidekiq:
+    replicaCount: 0
+  
+  # Disable extras
+  gitaly:
+    replicaCount: 1
+    persistence:
+      enabled: false
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+  
+  shell:
+    replicaCount: 1
 
+# Disable all runners
 gitlab-runner:
   enabled: false
 
+# Minimal database
 postgresql:
   enabled: true
   auth:
@@ -28,7 +53,15 @@ postgresql:
   primary:
     persistence:
       enabled: false
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 512Mi
 
+# Minimal redis
 redis:
   install: true
   replica:
@@ -36,15 +69,37 @@ redis:
   master:
     persistence:
       enabled: false
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
 
+# Disable heavy components
 prometheus:
   enabled: false
 
 certmanager-issuer:
-  email: admin@gitlab.local
+  enabled: false
 
 nginx-ingress:
   enabled: false
 
 registry:
+  enabled: false
+
+certmanager:
+  enabled: false
+
+# Disable monitoring and logging
+grafana:
+  enabled: false
+
+gitlab-exporter:
+  enabled: false
+
+# Disable KAS (Kubernetes Agent Server)
+kas:
   enabled: false
