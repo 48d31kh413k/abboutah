@@ -51,7 +51,7 @@ k3d cluster create iot-cluster \
   --port "8888:8888@loadbalancer" \
   --port "8080:8080@loadbalancer" \
   --port "443:443@loadbalancer" \
-  --memory 2g \
+  --servers-memory 2g \
   --servers 1
 
 mkdir -p ~/.kube
