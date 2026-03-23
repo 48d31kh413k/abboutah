@@ -7,7 +7,7 @@ metadata:
 spec:
   project: default  # Use default Argo project
   source:
-    repoURL: https://github.com/48d31kh413k/Inception-of-things  # GitHub repo containing manifests
+    repoURL: https://github.com/48d31kh413k/abboutah  # GitHub repo containing manifests
     targetRevision: main  # Track the main branch
     path: p3/confs/app  # Path to app manifests in the repo
   destination:

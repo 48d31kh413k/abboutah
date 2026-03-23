@@ -152,7 +152,7 @@ metadata:
   namespace: argocd        # Stores in argocd namespace (system level)
 spec:
   source:
-    repoURL: https://github.com/48d31kh413k/Inception-of-things
+    repoURL: https://github.com/48d31kh413k/abboutah
     targetRevision: main   # Always watch the 'main' branch
     path: p3/confs/app     # These files are the deployment spec
   
@@ -170,7 +170,7 @@ spec:
 
 **How it works (the GitOps loop):**
 1. Argo CD reads this resource
-2. Every 3 minutes, fetches https://github.com/48d31kh413k/Inception-of-things
+2. Every 3 minutes, fetches https://github.com/48d31kh413k/abboutah
 3. Looks inside `p3/confs/app/` for Kubernetes manifests
 4. Compares those manifests to what's running in the `dev` namespace
 5. If different, updates the cluster
@@ -459,7 +459,7 @@ cat confs/argocd-app.yaml | grep repoURL
 
 Expected output:
 ```
-    repoURL: https://github.com/48d31kh413k/Inception-of-things
+    repoURL: https://github.com/48d31kh413k/abboutah
 ```
 
 **Why:** Argo CD fetches manifests from this URL without authentication (public access only). If the repo is private, Argo CD gets `403 Forbidden` and sync fails.
@@ -898,7 +898,7 @@ git push origin main
 ```
 
 **What happens inside GitHub:**
-- Your commit goes to https://github.com/48d31kh413k/Inception-of-things
+- Your commit goes to https://github.com/48d31kh413k/abboutah
 - The `main` branch now includes v2 image tag
 - All changes pushed to remote (Argo CD can see them)
 
@@ -1041,7 +1041,7 @@ kubectl describe application playground -n argocd
 # Expected output includes:
 #   Sync Status: Synced (green)
 #   Health Status: Healthy (green)
-#   Repo: https://github.com/48d31kh413k/Inception-of-things
+#   Repo: https://github.com/48d31kh413k/abboutah
 #   Path: p3/confs/app
 #   Dest Namespace: dev
 ```
@@ -1147,7 +1147,7 @@ kubectl get application playground -n argocd -o yaml
 **Step 3: Manually check if manifests exist on GitHub**
 ```bash
 # Replace with your actual repo URL
-curl -s https://raw.githubusercontent.com/48d31kh413k/Inception-of-things/main/p3/confs/app/deployment.yaml | head -20
+curl -s https://raw.githubusercontent.com/48d31kh413k/abboutah/main/p3/confs/app/deployment.yaml | head -20
 
 # If you get 404, the path is wrong
 # If you get 403, the repo is private
@@ -1316,7 +1316,7 @@ kubectl apply --server-side -f https://raw.githubusercontent.com/argoproj/argo-c
 cat confs/app/deployment.yaml | grep image
 
 # Check what's in GitHub (what Argo CD sees)
-curl -s https://raw.githubusercontent.com/48d31kh413k/Inception-of-things/main/p3/confs/app/deployment.yaml | grep image
+curl -s https://raw.githubusercontent.com/48d31kh413k/abboutah/main/p3/confs/app/deployment.yaml | grep image
 
 # Are they the same?
 ```
