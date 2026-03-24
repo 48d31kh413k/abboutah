@@ -15,9 +15,6 @@ gitlab:
       type: ClusterIP
       externalPort: 80
 
-certmanager:
-  install: false
-
 nginx-ingress:
   enabled: false
 
