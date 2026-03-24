@@ -46,9 +46,39 @@ sleep 5
 # Create gitlab namespace
 kubectl create namespace gitlab 2>/dev/null || true
 
-# Create initial root password secret required by migrations
+# Pre-create ALL required secrets to avoid mount failures
 kubectl create secret generic gitlab-initial-root-password \
   --from-literal=password="InsecurePassword1!" \
+  -n gitlab 2>/dev/null || true
+
+kubectl create secret generic gitlab-registry-database-password \
+  --from-literal=password="registrysecret" \
+  -n gitlab 2>/dev/null || true
+
+kubectl create secret generic gitlab-rails-secret \
+  --from-literal=secrets.yml="default:\n  secret_key_base: thisisasecretkey1234567890\n" \
+  -n gitlab 2>/dev/null || true
+
+kubectl create secret generic gitlab-gitaly-secret \
+  --from-literal=token="gitalysecret1234567890" \
+  -n gitlab 2>/dev/null || true
+
+kubectl create secret generic gitlab-redis-secret \
+  --from-literal=redis-password="redissecret" \
+  -n gitlab 2>/dev/null || true
+
+kubectl create secret generic gitlab-postgresql-password \
+  --from-literal=postgresql-password="postgressecret" \
+  --from-literal=postgresql-postgres-password="postgressecret" \
+  -n gitlab 2>/dev/null || true
+
+kubectl create secret generic gitlab-minio-secret \
+  --from-literal=accesskey="minioadmin" \
+  --from-literal=secretkey="minioadmin123" \
+  -n gitlab 2>/dev/null || true
+
+kubectl create secret generic gitlab-gitlab-runner-secret \
+  --from-literal=runner-registration-token="runnersecret" \
   -n gitlab 2>/dev/null || true
 
 # Clean up any leftover upgrade-check jobs from previous runs
