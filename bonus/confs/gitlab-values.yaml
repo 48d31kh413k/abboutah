@@ -6,6 +6,8 @@ global:
     enabled: false
   certManager:
     enabled: false
+  minio:
+    enabled: true
   resources:
     requests:
       cpu: 25m
@@ -82,7 +84,7 @@ postgresql:
 
 # Minimal redis
 redis:
-  enabled: true
+  install: true
   replica:
     replicaCount: 0
   master:
@@ -96,9 +98,8 @@ redis:
         cpu: 50m
         memory: 64Mi
 
-# Disable heavy components
+# Minio (object storage)
 minio:
-  enabled: true
   persistence:
     enabled: false
   resources:
