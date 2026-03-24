@@ -20,7 +20,7 @@ global:
     secret: gitlab-initial-root-password
 
 gitlab:
-  # Minimize webservice
+  # Minimize webservice - disable problematic init containers
   webservice:
     replicaCount: 1
     resources:
@@ -37,11 +37,13 @@ gitlab:
     init:
       resources:
         limits:
-          cpu: 200m
-          memory: 512Mi
+          cpu: 500m
+          memory: 1Gi
         requests:
-          cpu: 50m
-          memory: 256Mi
+          cpu: 100m
+          memory: 512Mi
+    extraEnv:
+      SKIP_MIGRATIONS: "true"
   
   # Disable sidekiq and migrations (not needed for fresh local install)
   sidekiq:
