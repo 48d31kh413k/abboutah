@@ -47,17 +47,11 @@ helm upgrade --install gitlab gitlab/gitlab \
   -n gitlab \
   -f "$CONFS_DIR/gitlab-values.yaml" \
   --timeout 20m \
-  --wait=false &>/dev/null &
+  --wait=false &>/dev/null
 
-# Remove upgrade-check jobs that block deployment (they fail anyway on fresh installs)
-# Run in a loop to keep deleting them as they get recreated
-(
-  for i in {1..30}; do
-    sleep 2
-    kubectl delete job -n gitlab -l app.kubernetes.io/instance=gitlab-upgrade-check 2>/dev/null || true
-    kubectl delete job -n gitlab --field-selector status.successful=0 -l app.kubernetes.io/name=gitlab-upgrade-check 2>/dev/null || true
-  done
-) &
+# Clean up upgrade-check jobs if they appear (non-blocking, fire and forget)
+sleep 10
+kubectl delete job -n gitlab --all -l app.kubernetes.io/instance=gitlab-upgrade-check 2>/dev/null &
 
 # =============================================================================
 # Summary
