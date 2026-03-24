@@ -38,6 +38,9 @@ echo -e "${GREEN}[3/3] Deploy GitLab${RESET}"
 # Create gitlab namespace
 kubectl create namespace gitlab 2>/dev/null || true
 
+# Clean up any leftover upgrade-check jobs from previous runs
+kubectl delete job -n gitlab -l app.kubernetes.io/instance=gitlab-upgrade-check 2>/dev/null || true
+
 # Add GitLab Helm repo
 helm repo add gitlab https://charts.gitlab.io 2>/dev/null || true
 helm repo update gitlab 2>/dev/null || true
