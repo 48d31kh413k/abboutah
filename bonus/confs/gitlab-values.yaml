@@ -17,6 +17,10 @@ global:
       memory: 128Mi
 
 gitlab:
+  # Skip upgrade check (we're doing fresh install)
+  upgradeCheck:
+    enabled: false
+  
   # Minimize webservice
   webservice:
     replicaCount: 1
