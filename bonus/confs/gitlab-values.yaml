@@ -11,11 +11,11 @@ global:
   skipPreFlightValidations: true
   resources:
     requests:
-      cpu: 25m
-      memory: 64Mi
+      cpu: 10m
+      memory: 32Mi
     limits:
-      cpu: 100m
-      memory: 128Mi
+      cpu: 50m
+      memory: 64Mi
   initialRootPassword:
     secret: gitlab-initial-root-password
 
@@ -37,15 +37,22 @@ gitlab:
     init:
       resources:
         limits:
-          cpu: 1000m
-          memory: 2Gi
-        requests:
-          cpu: 200m
+          cpu: 500m
           memory: 1Gi
+        requests:
+          cpu: 100m
+          memory: 512Mi
   
   # Enable migrations to initialize database schema
   migrations:
     enabled: true
+    resources:
+      requests:
+        cpu: 50m
+        memory: 256Mi
+      limits:
+        cpu: 200m
+        memory: 512Mi
   
   # Disable sidekiq (not needed for fresh local install)
   sidekiq:
@@ -59,22 +66,22 @@ gitlab:
       enabled: false
     resources:
       requests:
-        cpu: 25m
-        memory: 256Mi
+        cpu: 10m
+        memory: 128Mi
       limits:
-        cpu: 100m
-        memory: 512Mi
+        cpu: 50m
+        memory: 256Mi
   
   # Minimal shell
   shell:
     replicaCount: 1
     resources:
       requests:
-        cpu: 25m
-        memory: 64Mi
+        cpu: 10m
+        memory: 32Mi
       limits:
-        cpu: 100m
-        memory: 128Mi
+        cpu: 50m
+        memory: 64Mi
 
 # Explicitly disable runners
 gitlab-runner:
@@ -91,11 +98,11 @@ postgresql:
       enabled: false
     resources:
       requests:
-        cpu: 25m
-        memory: 128Mi
+        cpu: 50m
+        memory: 64Mi
       limits:
-        cpu: 100m
-        memory: 384Mi
+        cpu: 150m
+        memory: 256Mi
 
 # Minimal redis
 redis:
@@ -107,11 +114,11 @@ redis:
       enabled: false
     resources:
       requests:
-        cpu: 25m
-        memory: 32Mi
+        cpu: 10m
+        memory: 16Mi
       limits:
         cpu: 50m
-        memory: 64Mi
+        memory: 32Mi
 
 # Minio (object storage)
 minio:
