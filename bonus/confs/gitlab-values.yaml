@@ -1,4 +1,4 @@
-# Minimal GitLab Helm Chart values for K3d local deployment - Lightweight Configuration
+# Minimal GitLab Helm Chart values for K3d local deployment - Ultra-Lightweight Configuration
 global:
   host: gitlab.local
   https: false
@@ -6,6 +6,13 @@ global:
     enabled: false
   certManager:
     enabled: false
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
 
 gitlab:
   # Minimize webservice
@@ -13,39 +20,51 @@ gitlab:
     replicaCount: 1
     resources:
       requests:
-        cpu: 50m
-        memory: 128Mi
+        cpu: 25m
+        memory: 64Mi
       limits:
-        cpu: 200m
-        memory: 256Mi
+        cpu: 100m
+        memory: 128Mi
     minReplicas: 1
     maxReplicas: 1
+    hpa:
+      enabled: false
   
-  # Minimal sidekiq
+  # Disable sidekiq completely
   sidekiq:
     replicaCount: 0
+    enabled: false
   
-  # Disable extras
+  # Minimal gitaly
   gitaly:
     replicaCount: 1
     persistence:
       enabled: false
     resources:
       requests:
-        cpu: 50m
-        memory: 128Mi
+        cpu: 25m
+        memory: 64Mi
       limits:
-        cpu: 200m
-        memory: 256Mi
+        cpu: 100m
+        memory: 128Mi
   
+  # Minimal shell
   shell:
     replicaCount: 1
+    resources:
+      requests:
+        cpu: 25m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
 
-# Disable all runners
+# Explicitly disable runners
 gitlab-runner:
   enabled: false
+  replicas: 0
 
-# Minimal database
+# Ultra-minimal database
 postgresql:
   enabled: true
   auth:
@@ -55,15 +74,15 @@ postgresql:
       enabled: false
     resources:
       requests:
-        cpu: 50m
-        memory: 128Mi
+        cpu: 25m
+        memory: 64Mi
       limits:
-        cpu: 200m
-        memory: 512Mi
+        cpu: 100m
+        memory: 256Mi
 
 # Minimal redis
 redis:
-  install: true
+  enabled: true
   replica:
     replicaCount: 0
   master:
@@ -71,19 +90,30 @@ redis:
       enabled: false
     resources:
       requests:
+        cpu: 25m
+        memory: 32Mi
+      limits:
         cpu: 50m
         memory: 64Mi
-      limits:
-        cpu: 100m
-        memory: 128Mi
 
 # Disable heavy components
+minio:
+  enabled: true
+  persistence:
+    enabled: false
+  resources:
+    requests:
+      cpu: 25m
+      memory: 32Mi
+    limits:
+      cpu: 50m
+      memory: 64Mi
+
 prometheus:
   enabled: false
 
 certmanager-issuer:
   enabled: false
-  email: admin@gitlab.local
 
 nginx-ingress:
   enabled: false
@@ -94,13 +124,15 @@ registry:
 certmanager:
   enabled: false
 
-# Disable monitoring and logging
 grafana:
   enabled: false
 
 gitlab-exporter:
   enabled: false
 
-# Disable KAS (Kubernetes Agent Server)
 kas:
+  enabled: false
+
+# Global pod disruption budget disable
+podDisruptionBudget:
   enabled: false
