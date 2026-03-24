@@ -1,22 +1,24 @@
-# Minimal GitLab Helm values for local K3d bonus setup
 global:
   edition: ce
+
   hosts:
-    domain: gitlab.local
+    domain: localhost
+    https: false
+
   ingress:
     enabled: false
     configureCertmanager: false
+
   initialRootPassword:
     secret: gitlab-initial-root-password
+
+installCertmanager: false
 
 gitlab:
   webservice:
     service:
       type: ClusterIP
       externalPort: 80
-
-certmanager:
-  install: false
 
 nginx-ingress:
   enabled: false
