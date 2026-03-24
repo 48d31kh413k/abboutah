@@ -1,243 +1,87 @@
-# Bonus Part: GitLab Integration with Part 3
+# Bonus Part: Simple GitLab Integration (on top of Part 3)
 
-## Overview
+This bonus keeps Part 3 exactly as-is and only adds a local GitLab instance in a dedicated `gitlab` namespace.
 
-This bonus **extends Part 3** by adding **GitLab** as a local, self-hosted Git repository to your existing K3d cluster. Instead of using GitHub, your Argo CD instance can sync from a GitLab repository running locally in Kubernetes.
+## Goal
 
-**Important:** This bonus assumes you have already completed **Part 3** and have a working K3d cluster with Argo CD and the playground app running.
+- Keep `argocd` and `dev` namespaces from Part 3 working
+- Add a third namespace: `gitlab`
+- Run a local GitLab (latest Helm chart)
+- Point Argo CD to a GitLab repository and keep GitOps flow
 
-## Architecture
+## Files
 
-```
-K3d Cluster (from Part 3)
-├── argocd (namespace) ✓ Already exists
-├── dev (namespace) ✓ Already exists
-│   └── playground app ✓ Already running
-└── gitlab (namespace) ← Bonus adds this
-    └── GitLab instance (local Git host)
-```
+- `confs/namespace.yaml`: creates `gitlab` namespace
+- `confs/gitlab-values.yaml`: minimal Helm values for local usage
+- `scripts/install.sh`: simple installer, no scaling down of Argo CD
+- `scripts/gitlab-helper.sh`: helper for mirror/config/status
 
-## Prerequisites
+## Install
 
-- ✅ **Part 3 must be completed and running**
-  - K3d cluster with Argo CD
-  - Playground app deployed in `dev` namespace
-  - kubectl, k3d, and Helm already installed
-  - VM with SSH access configured
-
-## What Bonus Adds
-
-| File | Purpose |
-|------|---------|
-| `confs/gitlab-values.yaml` | Minimal GitLab Helm configuration |
-| `confs/namespace.yaml` | Creates `gitlab` namespace only |
-| `scripts/install.sh` | Deploys GitLab to existing cluster |
-| `scripts/gitlab-helper.sh` | Utilities for repo mirroring & GitOps |
-
-## Installation
-
-**Prerequisites:** You must have Part 3 already running with a K3d cluster.
-
-1. **SSH into your VM:**
-   ```bash
-   ssh root@127.0.0.1 -p 2222
-   ```
-
-2. **Run the installation script:**
-   ```bash
-   cd ~/Desktop/Inception-of-things/bonus/scripts
-   chmod +x install.sh
-   ./install.sh
-   ```
-
-The script will:
-- Check that Part 3 cluster is running
-- Create `gitlab` namespace
-- Deploy GitLab Helm chart
-- Keep Part 3 services untouched
-
-⏳ Installation takes ~15-20 minutes (mainly GitLab initialization)
-
-##### SCREENSHOT NEEDED HERE ###
-# **Show:** Installation script output showing GitLab deployed and namespaces created
-- Deploy GitLab using Helm
-- Reconfigure Argo CD to sync from GitLab instead of GitHub
-- Output new access credentials and commands
-
-## Accessing Services
-
-### From the VM:
-
-**GitLab:**
-```bash
-kubectl port-forward svc/gitlab-webservice -n gitlab 443:8181 &
-curl https://localhost  # Or use a browser
-# Username: root
-# Password: Check output of install.sh
-```
-
-**Argo CD:**
-```bash
-kubectl port-forward svc/argocd-server -n argocd 8080:443 &
-# Browse to https://localhost:8080
-# Username: admin
-# Password: Check output of install.sh
-```
-
-**Playground App:**
-```bash
-kubectl port-forward svc/playground -n dev 8888:8888 &
-curl http://localhost:8888
-```
-
-### From your macOS:
-
-In separate terminals, create SSH tunnels:
+Run inside the VM where Part 3 is already running:
 
 ```bash
-# Terminal 1: GitLab
-ssh -L 443:localhost:443 root@127.0.0.1 -p 2222 -N
-
-# Terminal 2: Argo CD
-ssh -L 8080:localhost:8080 root@127.0.0.1 -p 2222 -N
-
-# Terminal 3: Playground
-ssh -L 8888:localhost:8888 root@127.0.0.1 -p 2222 -N
+cd ~/Desktop/Inception-of-things/bonus/scripts
+chmod +x install.sh
+./install.sh
 ```
 
-Then from your Mac browser:
-- GitLab: `https://localhost`
-- Argo CD: `http://localhost:8080`
-- Playground: `http://localhost:8888`
+The script:
 
-## Setting Up GitLab Repository
+1. Validates cluster access
+2. Installs Helm if missing
+3. Creates `gitlab` namespace
+4. Creates initial root password secret
+5. Installs/updates GitLab chart
 
-1. **Log in to GitLab** (`https://localhost`)
-   - Username: `root`
-   - Password: From install.sh output
+## Access GitLab
 
-##### SCREENSHOT NEEDED HERE ###
-# **Show:** GitLab dashboard logged in and accessible
+From VM:
 
-2. **Create a new project:**
-   - Click "New project"
-   - Name: `inception-of-things` (or your preferred name)
-   - Visibility: Public (required for Argo CD to access)
-   - Initialize with README
-
-##### SCREENSHOT NEEDED HERE ###
-# **Show:** GitLab project created with visibility set to Public
-
-3. **Mirror your project:**
-   ```bash
-   # In your local macOS terminal
-   git clone https://github.com/YOUR_GITHUB/inception-of-things.git temp
-   cd temp
-   git push --mirror https://gitlab.local/root/inception-of-things.git
-   cd ..
-   rm -rf temp
-   ```
-
-4. **Configure Argo CD:**
-   - Edit `confs/argocd-app.yaml` and update the `repoURL` to match your GitLab project
-   - Apply the updated configuration:
-     ```bash
-     kubectl delete app playground-gitlab -n argocd 2>/dev/null || true
-     kubectl apply -f confs/argocd-app.yaml
-     ```
-
-## GitOps Workflow with GitLab
-
-This setup follows the same GitOps principles as Part 3, but with GitLab as the source of truth:
-
-1. **Update deployment version locally:**
-   ```bash
-   git clone https://gitlab.local/root/inception-of-things.git
-   cd inception-of-things/bonus/confs/app
-   # Edit deployment.yaml, change image tag from v1 to v2
-   git add deployment.yaml
-   git commit -m "Bump playground to v2"
-   git push
-   ```
-
-##### SCREENSHOT NEEDED HERE ###
-# **Show:** Git push output showing commit pushed to local GitLab
-
-2. **Argo CD auto-syncs within 3 minutes**
-
-##### SCREENSHOT NEEDED HERE ###
-# **Show:** Argo CD dashboard showing application transitioning from OutOfSync to Synced
-
-3. **Verify the update:**
-   ```bash
-   curl http://localhost:8888/
-   # Should return: {"status":"ok", "message": "v2"}
-   ```
-
-##### SCREENSHOT NEEDED HERE ###
-# **Show:** curl response showing v2 (proves local GitLab GitOps works!)
-
-## Managing Self-Signed Certificates
-
-GitLab with HTTPS may use self-signed certificates. If Argo CD has issues accessing GitLab:
-
-1. **Get GitLab's certificate:**
-   ```bash
-   kubectl get secret -n gitlab gitlab-self-signed-cert -o jsonpath='{.data.tls\.crt}' | base64 -d > /tmp/gitlab-cert.pem
-   ```
-
-2. **Configure Argo CD to trust it:**
-   ```bash
-   kubectl create secret generic argocd-repo-server-tls \
-     --from-file=cert=/tmp/gitlab-cert.pem \
-     -n argocd
-   ```
-
-## Troubleshooting
-
-**GitLab not starting:**
-- Wait 2-3 minutes for GitLab to fully initialize
-- Check pod status: `kubectl get pods -n gitlab`
-- View logs: `kubectl logs -n gitlab -l app=gitlab-webservice`
-
-**Argo CD can't access GitLab:**
-- Verify GitLab is running: `kubectl get pods -n gitlab`
-- Check repository URL in `argocd-app.yaml`
-- Ensure the repository is public or add credentials to Argo CD
-
-**Port conflicts:**
-- If ports 443, 8080, or 8888 are already in use, modify port mappings in `install.sh`
-
-## Cleanup
-
-To remove the entire K3d cluster:
 ```bash
-k3d cluster delete iot-cluster
+kubectl port-forward svc/gitlab-webservice-default -n gitlab 8081:8181
 ```
 
-## Key Differences from Part 3
+Then open `http://localhost:8081`.
 
-| Feature | Part 3 (GitHub) | Bonus (GitLab) |
-|---------|---|---|
-| Repository Host | GitHub.com | Local GitLab in K8s |
-| Access | Public GitHub | Local only |
-| Setup Complexity | Simple | Medium (Helm required) |
-| Performance | Network-dependent | Local (faster) |
-| Scalability | GitHub-hosted | Limited to K3d resources |
+- User: `root`
+- Password: `InsecurePassword1!`
 
-## Learning Outcomes
+You can also print the password with:
 
-By completing this bonus:
-- ✅ Understand how to deploy complex applications with Helm
-- ✅ Set up a self-hosted Git service in Kubernetes
-- ✅ Integrate local Git repositories with Argo CD
-- ✅ Manage certificate trust between services
-- ✅ Master GitOps with a production-like setup
+```bash
+./gitlab-helper.sh show-password
+```
 
-**For detailed setup and verification steps with screenshots, see the sections above.**
+## Wire Argo CD to GitLab
 
-## References
+1. Create a project in local GitLab (for example `inception-of-things`).
+2. Mirror your GitHub repo to GitLab:
 
-- [GitLab Helm Chart](https://docs.gitlab.com/ee/install/kubernetes/)
-- [Argo CD Documentation](https://argo-cd.readthedocs.io/)
-- [K3d Documentation](https://k3d.io/)
+```bash
+./gitlab-helper.sh mirror-repo https://github.com/<you>/<repo>.git root <password>
+```
+
+3. Configure Argo CD to use GitLab:
+
+```bash
+./gitlab-helper.sh configure-argocd http://localhost:8081/root/<repo>.git
+```
+
+This Argo CD app syncs from `p3/confs/app`, so your Part 3 app version switch (`v1` -> `v2`) remains the same workflow.
+
+## Verify
+
+```bash
+./gitlab-helper.sh show-status
+kubectl get ns
+kubectl get app -n argocd
+kubectl get pods -n gitlab
+kubectl get pods -n dev
+```
+
+## Notes
+
+- Bonus does not delete, scale down, or replace Part 3 workloads.
+- If GitLab startup is slow, keep checking `kubectl get pods -n gitlab`.
+- For the defense, demonstrate that changing image tag in GitLab repo updates app in `dev` namespace.

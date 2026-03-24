@@ -1,162 +1,45 @@
-# Minimal GitLab Helm Chart values for K3d local deployment - Ultra-Lightweight Configuration
+# Minimal GitLab Helm values for local K3d bonus setup
 global:
-  host: gitlab.local
-  https: false
+  edition: ce
+  hosts:
+    domain: gitlab.local
   ingress:
     enabled: false
-  certManager:
-    enabled: false
-  minio:
-    enabled: true
-  skipPreFlightValidations: true
-  resources:
-    requests:
-      cpu: 10m
-      memory: 32Mi
-    limits:
-      cpu: 50m
-      memory: 64Mi
+    configureCertmanager: false
   initialRootPassword:
     secret: gitlab-initial-root-password
 
 gitlab:
-  # Minimize webservice - disable problematic init containers
   webservice:
-    replicaCount: 1
-    resources:
-      requests:
-        cpu: 25m
-        memory: 256Mi
-      limits:
-        cpu: 100m
-        memory: 512Mi
-    minReplicas: 1
-    maxReplicas: 1
-    hpa:
-      enabled: false
-    init:
-      resources:
-        limits:
-          cpu: 500m
-          memory: 1Gi
-        requests:
-          cpu: 100m
-          memory: 512Mi
-  
-  # Enable migrations to initialize database schema
-  migrations:
-    enabled: true
-    resources:
-      requests:
-        cpu: 50m
-        memory: 256Mi
-      limits:
-        cpu: 200m
-        memory: 512Mi
-  
-  # Disable sidekiq (not needed for fresh local install)
-  sidekiq:
-    replicaCount: 0
-    enabled: false
-  
-  # Minimal gitaly
-  gitaly:
-    replicaCount: 1
-    persistence:
-      enabled: false
-    resources:
-      requests:
-        cpu: 10m
-        memory: 128Mi
-      limits:
-        cpu: 50m
-        memory: 256Mi
-  
-  # Minimal shell
-  shell:
-    replicaCount: 1
-    resources:
-      requests:
-        cpu: 10m
-        memory: 32Mi
-      limits:
-        cpu: 50m
-        memory: 64Mi
+    service:
+      type: ClusterIP
+      externalPort: 80
 
-# Explicitly disable runners
-gitlab-runner:
-  enabled: false
-  replicas: 0
-
-# Ultra-minimal database
-postgresql:
-  enabled: true
-  auth:
-    password: "gitlab-postgres-password"
-  primary:
-    persistence:
-      enabled: false
-    resources:
-      requests:
-        cpu: 50m
-        memory: 64Mi
-      limits:
-        cpu: 150m
-        memory: 256Mi
-
-# Minimal redis
-redis:
-  install: true
-  replica:
-    replicaCount: 0
-  master:
-    persistence:
-      enabled: false
-    resources:
-      requests:
-        cpu: 10m
-        memory: 16Mi
-      limits:
-        cpu: 50m
-        memory: 32Mi
-
-# Minio (object storage)
-minio:
-  persistence:
-    enabled: false
-  resources:
-    requests:
-      cpu: 25m
-      memory: 32Mi
-    limits:
-      cpu: 50m
-      memory: 64Mi
-
-prometheus:
-  enabled: false
-
-certmanager-issuer:
-  enabled: false
-  email: admin@gitlab.local
+certmanager:
+  install: false
 
 nginx-ingress:
   enabled: false
 
+prometheus:
+  install: false
+
+gitlab-runner:
+  install: false
+
 registry:
   enabled: false
 
-certmanager:
-  enabled: false
+minio:
+  persistence:
+    enabled: false
 
-grafana:
-  enabled: false
+redis:
+  master:
+    persistence:
+      enabled: false
 
-gitlab-exporter:
-  enabled: false
-
-kas:
-  enabled: false
-
-# Global pod disruption budget disable
-podDisruptionBudget:
-  enabled: false
+postgresql:
+  primary:
+    persistence:
+      enabled: false

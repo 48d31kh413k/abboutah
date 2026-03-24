@@ -7,16 +7,16 @@ usage() {
   echo ""
   echo "Commands:"
   echo "  mirror-repo <github-url> <gitlab-username> <gitlab-password>"
-  echo "      Mirror a GitHub repository to your local GitLab"
+  echo "      Mirror a GitHub repository to local GitLab (same repo name)"
   echo ""
   echo "  configure-argocd <gitlab-project-url>"
-  echo "      Configure Argo CD to sync from a GitLab repository"
-  echo ""
-  echo "  test-sync"
-  echo "      Test the GitOps workflow by bumping the app version"
+  echo "      Point Argo CD app to GitLab using p3/confs/app manifests"
   echo ""
   echo "  show-status"
-  echo "      Display current cluster status"
+  echo "      Show cluster, GitLab and Argo CD status"
+  echo ""
+  echo "  show-password"
+  echo "      Print GitLab initial root password"
   exit 1
 }
 
@@ -35,6 +35,7 @@ case $COMMAND in
     GITHUB_URL=$2
     GITLAB_USER=$3
     GITLAB_PASS=$4
+    REPO_NAME="$(basename "$GITHUB_URL" .git)"
     
     echo "[*] Mirroring GitHub repo to GitLab..."
     TEMP_DIR=$(mktemp -d)
@@ -42,11 +43,12 @@ case $COMMAND in
     
     git clone --mirror "$GITHUB_URL" repo.git
     cd repo.git
-    git push --mirror "https://${GITLAB_USER}:${GITLAB_PASS}@gitlab.local/${GITLAB_USER}/$(basename $GITHUB_URL)"
+    git push --mirror "http://${GITLAB_USER}:${GITLAB_PASS}@localhost:8081/${GITLAB_USER}/${REPO_NAME}.git"
     
     cd /
     rm -rf "$TEMP_DIR"
-    echo "[+] Mirror complete!"
+    echo "[+] Mirror complete"
+    echo "    GitLab repo URL: http://localhost:8081/${GITLAB_USER}/${REPO_NAME}.git"
     ;;
     
   configure-argocd)
@@ -70,7 +72,7 @@ spec:
   source:
     repoURL: $GITLAB_REPO
     targetRevision: main
-    path: bonus/confs/app
+    path: p3/confs/app
   destination:
     server: https://kubernetes.default.svc
     namespace: dev
@@ -91,27 +93,6 @@ EOF
     echo "[*] Waiting for sync..."
     sleep 5
     kubectl get app -n argocd
-    ;;
-    
-  test-sync)
-    echo "[*] Testing GitOps sync workflow..."
-    echo "[*] This would require cloning the GitLab repo locally and updating it"
-    echo "[*] For now, showing current app status:"
-    
-    echo ""
-    echo "=== Argo CD App Status ==="
-    kubectl describe app playground-gitlab -n argocd 2>/dev/null || echo "App not configured yet"
-    
-    echo ""
-    echo "=== Deployed Pod ==="
-    kubectl get pods -n dev -l app=playground
-    
-    echo ""
-    echo "=== Test Request ==="
-    kubectl port-forward svc/playground -n dev 8888:8888 &
-    sleep 2
-    curl http://localhost:8888/ || echo "Service not ready"
-    kill %1 2>/dev/null || true
     ;;
     
   show-status)
@@ -137,6 +118,11 @@ EOF
     echo ""
     echo "=== Argo CD Applications ==="
     kubectl get app -n argocd
+    ;;
+
+  show-password)
+    kubectl get secret gitlab-initial-root-password -n gitlab -o jsonpath='{.data.password}' | base64 -d
+    echo ""
     ;;
     
   *)
