@@ -39,6 +39,10 @@ echo -e "${GREEN}[5/5] Install or upgrade GitLab Helm release${RESET}"
 helm repo add gitlab https://charts.gitlab.io 2>/dev/null || true
 helm repo update
 
+# Clean up old release if it exists to avoid schema conflicts
+helm delete gitlab -n gitlab 2>/dev/null || true
+sleep 2
+
 helm upgrade --install gitlab gitlab/gitlab \
   -n gitlab \
   -f "$CONFS_DIR/gitlab-values.yaml" \
