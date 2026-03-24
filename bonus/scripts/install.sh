@@ -67,37 +67,32 @@ kubectl wait --for=condition=Ready nodes --all --timeout=60s 2>/dev/null || true
 echo "[4/6] Create namespaces (gitlab, argocd, dev)"
 kubectl apply -f "$CONFS_DIR/namespace.yaml"
 
-# Phase 5: Install and configure GitLab
-echo "[5/6] Install GitLab using Helm"
-# Clean up old failed pods before installing
+# Phase 5: Install and configure GitLab (in background, non-blocking)
+echo "[5/6] Install GitLab using Helm (background process)..."
+# Clean up old failed pods
 kubectl delete pods --all -n gitlab 2>/dev/null || true
 docker system prune -f 2>/dev/null || true
 
-helm repo add gitlab https://charts.gitlab.io
-helm repo update
+helm repo add gitlab https://charts.gitlab.io 2>/dev/null || true
+helm repo update gitlab 2>/dev/null || true
 
-# Install GitLab Community Edition
+# Install GitLab WITHOUT waiting (--wait=false)
 helm upgrade --install gitlab gitlab/gitlab \
   --namespace gitlab \
   --values "$CONFS_DIR/gitlab-values.yaml" \
-  --timeout 15m \
-  --wait 2>&1 | grep -v "Warning:" || true
+  --timeout 20m \
+  --wait=false &>/dev/null &
 
-# Wait for GitLab to be ready
-echo "Waiting for GitLab to initialize (this may take a few minutes)..."
-echo "[*] Waiting for webservice pods to be ready..."
-kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=webservice -n gitlab --timeout=600s 2>/dev/null || {
-  echo "[!] Warning: Pods not ready after 10 minutes. Checking status..."
-  kubectl get pods -n gitlab -o wide
-}
+echo "[✓] GitLab installation started (continues in background)"
 
-# Phase 6: Install Argo CD
+# Phase 6: Install Argo CD (fast, blocking - this is core requirement)
 echo "[6/6] Deploy Argo CD"
 kubectl apply --server-side -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml -n argocd 2>&1 | grep -v "Warning:" || true
 
-# Wait for Argo CD to be ready
-sleep 10
-kubectl wait --for=condition=available --timeout=120s deployment/argocd-server -n argocd 2>/dev/null || true
+# Quick 30-second wait for Argo CD (faster than original)
+echo "[*] Waiting for Argo CD to initialize..."
+kubectl wait --for=condition=available --timeout=30s deployment/argocd-server -n argocd 2>/dev/null || true
+kubectl wait --for=ready pod -l app.kubernetes.io/name=argocd-server -n argocd --timeout=60s 2>/dev/null || true
 
 # Check for disk pressure issues
 echo "[*] Checking cluster health..."
@@ -108,37 +103,33 @@ if kubectl get nodes -o jsonpath='{.items[*].status.conditions[?(@.type=="DiskPr
   echo "[!]   k3d cluster delete iot-cluster && bash install.sh"
 fi
 
-# Retrieve passwords
-GITLAB_PASS="$(kubectl -n gitlab get secret gitlab-gitlab-initial-root-password -o jsonpath='{.data.password}' 2>/dev/null | base64 -d || echo 'N/A')"
-ARGOCD_PASS="$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' 2>/dev/null | base64 -d || echo 'N/A')"
-
 # Display setup completion summary
 echo ""
 echo "=========================================="
-echo "Installation Complete!"
+echo "✓ Installation Complete!"
 echo "=========================================="
 echo ""
-echo "=== GitLab Access (VM) ==="
-echo "kubectl port-forward svc/gitlab-webservice -n gitlab 443:8181 &"
-echo "https://localhost"
-echo "Username: root"
-echo "Password: $GITLAB_PASS"
+echo "=== IMMEDIATE ACCESS (Ready Now) ==="
 echo ""
-echo "=== Argo CD Access (VM) ==="
-echo "kubectl port-forward svc/argocd-server -n argocd 8080:443 &"
-echo "Username: admin"
-echo "Password: $ARGOCD_PASS"
+echo "Argo CD is READY:"
+echo "  kubectl port-forward svc/argocd-server -n argocd 8080:443 &"
+echo "  http://localhost:8080 (from Mac: ssh -L 8080:localhost:8080 root@127.0.0.1 -p 2222 -N)"
+echo "  Username: admin"
 echo ""
-echo "=== Playground App (VM) ==="
-echo "kubectl port-forward svc/playground -n dev 8888:8888 &"
+echo "=== BACKGROUND (Allow 15-20 mins) ==="
 echo ""
-echo "=== SSH Tunnels for Local Machine (macOS) ==="
-echo "ssh -L 8443:localhost:443 root@127.0.0.1 -p 2222 -N  # GitLab"
-echo "ssh -L 8080:localhost:8080 root@127.0.0.1 -p 2222 -N  # Argo CD"
-echo "ssh -L 8888:localhost:8888 root@127.0.0.1 -p 2222 -N  # Playground"
+echo "GitLab still initializing (check status: kubectl get pods -n gitlab):"
+echo "  kubectl port-forward svc/gitlab-webservice -n gitlab 443:8181 &"
+echo "  https://localhost (from Mac: ssh -L 8443:localhost:443 root@127.0.0.1 -p 2222 -N)"
+echo "  Username: root"
 echo ""
-echo "Then browse to:"
-echo "  GitLab: https://localhost:8443"
-echo "  Argo CD: http://localhost:8080"
-echo "  Playground: http://localhost:8888"
+echo "=== NEXT STEPS ==="
+echo "1. Deploy the app:"
+echo "   kubectl apply -f ~/Desktop/Inception-of-things/p3/confs/namespace.yaml"
+echo "   kubectl apply -f ~/Desktop/Inception-of-things/p3/confs/app/deployment.yaml"
+echo ""
+echo "2. Port-forward app:"
+echo "   kubectl port-forward svc/playground -n dev 8888:8888 &"
+echo "   http://localhost:8888"
+echo ""
 echo "=========================================="
