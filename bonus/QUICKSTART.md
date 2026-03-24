@@ -1,53 +1,97 @@
-# Bonus: Quick Start Guide
+# Bonus: GitLab Installation Guide
 
-## Prerequisites
+## ✅ Prerequisites
 
-✅ **Part 3 must be completed and running**
-- K3d cluster with Argo CD already set up
-- kubectl, k3d, and Helm already installed
-- VM is running and accessible
-- **⚠️ At least 5GB free disk space on VM** (GitLab + Argo CD require significant space)
+**Part 3 must be completed and running:**
+- K3d cluster with Argo CD running
+- Playground app deployed and accessible
+- kubectl and Helm installed on VM
+- At least 5GB free disk space
 
-## 5-Minute Setup
+## Installation (5 minutes)
 
-### Steps
-
-**1. SSH into VM:**
+### Step 1: SSH into VM
 ```bash
 ssh root@127.0.0.1 -p 2222
 ```
 
-**2. Run install script:**
+### Step 2: Run Installation Script
 ```bash
 cd ~/Desktop/Inception-of-things/bonus/scripts
 chmod +x install.sh
 ./install.sh
 ```
-⏳ Installation takes ~10-15 minutes (mainly GitLab initialization)
 
-**3. Once complete, you'll see:**
-- GitLab credentials
-- Argo CD credentials
-- Port-forward commands
+⏳ **Wait 15-20 minutes** for GitLab to initialize in background
 
-**4. From your Mac, open three terminals:**
-
-Terminal 1 (GitLab):
+### Step 3: Verify Installation
 ```bash
-ssh -L 8443:localhost:443 root@127.0.0.1 -p 2222 -N
+# Check GitLab pods
+kubectl get pods -n gitlab
+
+# Get GitLab pods status
+kubectl describe pod -n gitlab -l app=gitlab-webservice-default
 ```
 
-Terminal 2 (Argo CD):
+### Step 4: Access Services from Mac
+
+**Terminal 1 - Argo CD** (Part 3)
 ```bash
 ssh -L 8080:localhost:8080 root@127.0.0.1 -p 2222 -N
 ```
+→ Open http://localhost:8080
 
-Terminal 3 (Playground):
+**Terminal 2 - Playground App** (Part 3)
 ```bash
 ssh -L 8888:localhost:8888 root@127.0.0.1 -p 2222 -N
 ```
+→ Open http://localhost:8888
 
-**5. In your browser:**
+**Terminal 3 - GitLab** (Bonus - once ready)
+```bash
+ssh -L 8443:localhost:443 root@127.0.0.1 -p 2222 -N
+```
+→ Open http://localhost (when GitLab is ready)
+
+### Step 5: Get GitLab Credentials
+
+Once GitLab pods are `Running`:
+```bash
+# Get initial root password
+kubectl get secret gitlab-gitlab-initial-root-password -n gitlab -o jsonpath="{.data.password}" | base64 -d
+
+# Access URL
+http://localhost (or http://gitlab.k3d.gitlab.com)
+Username: root
+```
+
+## What's Deployed
+
+| Component | Status | Location |
+|-----------|--------|----------|
+| Argo CD (Part 3) | ✓ Already running | argocd namespace |
+| Playground App (Part 3) | ✓ Already running | dev namespace |
+| GitLab (Bonus) | Installing... | gitlab namespace |
+
+## Troubleshooting
+
+**GitLab taking too long?**
+```bash
+# Check GitLab logs
+kubectl logs -n gitlab -f deployment/gitlab-webservice-default
+
+# Check if any pods are stuck
+kubectl describe pod -n gitlab
+```
+
+**Port conflicts?**
+```bash
+# Check what's using port 443
+lsof -i :443
+
+# Free up space if needed
+docker system prune -a -f
+```
 - GitLab: `https://localhost:8443`
 - Argo CD: `http://localhost:8080`
 - Playground: `http://localhost:8888`

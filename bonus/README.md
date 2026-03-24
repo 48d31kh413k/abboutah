@@ -1,39 +1,44 @@
-# Bonus Part: K3d + GitLab + Argo CD
+# Bonus Part: GitLab Integration with Part 3
 
 ## Overview
 
-This bonus **extends Part 3** by adding **GitLab** as a local, self-hosted Git repository. Instead of using GitHub, your Argo CD instance will sync from a GitLab repository running locally in your Kubernetes cluster.
+This bonus **extends Part 3** by adding **GitLab** as a local, self-hosted Git repository to your existing K3d cluster. Instead of using GitHub, your Argo CD instance can sync from a GitLab repository running locally in Kubernetes.
 
-**Important:** This bonus assumes you have already completed **Part 3** and have a working K3d cluster with Argo CD running on your VM.
+**Important:** This bonus assumes you have already completed **Part 3** and have a working K3d cluster with Argo CD and the playground app running.
 
 ## Architecture
 
 ```
-┌──────────────────────────────────────────────┐
-│         K3d Cluster (Local)                  │
-│ ┌────────────┐  ┌────────────┐  ┌─────────┐ │
-│ │  GitLab    │  │  Argo CD   │  │  App    │ │
-│ │ (gitlab)   │→ │  (argocd)  │→ │  (dev)  │ │
-│ │ namespace  │  │ namespace  │  │namespace│ │
-│ └────────────┘  └────────────┘  └─────────┘ │
-└──────────────────────────────────────────────┘
-         ↑
-   Push configs & app
-   (git push to local GitLab)
+K3d Cluster (from Part 3)
+├── argocd (namespace) ✓ Already exists
+├── dev (namespace) ✓ Already exists
+│   └── playground app ✓ Already running
+└── gitlab (namespace) ← Bonus adds this
+    └── GitLab instance (local Git host)
 ```
 
 ## Prerequisites
 
-- **Part 3 setup already running** (K3d cluster from Part 3)
-- K3d, Docker, kubectl, and Helm already installed
-- VM with SSH access configured
-- Administrative access to the cluster
+- ✅ **Part 3 must be completed and running**
+  - K3d cluster with Argo CD
+  - Playground app deployed in `dev` namespace
+  - kubectl, k3d, and Helm already installed
+  - VM with SSH access configured
+
+## What Bonus Adds
+
+| File | Purpose |
+|------|---------|
+| `confs/gitlab-values.yaml` | Minimal GitLab Helm configuration |
+| `confs/namespace.yaml` | Creates `gitlab` namespace only |
+| `scripts/install.sh` | Deploys GitLab to existing cluster |
+| `scripts/gitlab-helper.sh` | Utilities for repo mirroring & GitOps |
 
 ## Installation
 
 **Prerequisites:** You must have Part 3 already running with a K3d cluster.
 
-1. **SSH into your VM (where Part 3 is running):**
+1. **SSH into your VM:**
    ```bash
    ssh root@127.0.0.1 -p 2222
    ```
@@ -45,9 +50,13 @@ This bonus **extends Part 3** by adding **GitLab** as a local, self-hosted Git r
    ./install.sh
    ```
 
-The script will add to your existing K3d cluster:
-- Create `gitlab` namespace with GitLab deployment
-- Create additional port mappings for GitLab
+The script will:
+- Check that Part 3 cluster is running
+- Create `gitlab` namespace
+- Deploy GitLab Helm chart
+- Keep Part 3 services untouched
+
+⏳ Installation takes ~15-20 minutes (mainly GitLab initialization)
 
 ##### SCREENSHOT NEEDED HERE ###
 # **Show:** Installation script output showing GitLab deployed and namespaces created
