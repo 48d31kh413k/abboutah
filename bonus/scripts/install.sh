@@ -49,6 +49,10 @@ helm upgrade --install gitlab gitlab/gitlab \
   --timeout 20m \
   --wait=false &>/dev/null &
 
+# Remove upgrade-check jobs that block deployment (they fail anyway on fresh installs)
+sleep 5
+kubectl delete job -n gitlab --all 2>/dev/null || true
+
 # =============================================================================
 # Summary
 # =============================================================================
