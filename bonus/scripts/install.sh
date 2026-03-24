@@ -31,15 +31,23 @@ echo -e "${GREEN}[2/3] Install Helm${RESET}"
 which helm &>/dev/null || curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash >/dev/null 2>&1
 
 # =============================================================================
-# Install GitLab
+# Optimize resources: scale down Part 3 Argo CD
 # =============================================================================
-echo -e "${GREEN}[3/3] Deploy GitLab${RESET}"
+echo -e "${GREEN}[3/3] Optimize cluster resources & Deploy GitLab${RESET}"
+
+echo -e "${YELLOW}[!] Scaling down Argo CD to free resources...${RESET}"
+kubectl scale deployment argocd-server -n argocd --replicas=0 2>/dev/null || true
+kubectl scale deployment argocd-application-controller -n argocd --replicas=0 2>/dev/null || true
+kubectl scale deployment argocd-repo-server -n argocd --replicas=0 2>/dev/null || true
+kubectl scale deployment argocd-dex-server -n argocd --replicas=0 2>/dev/null || true
+kubectl scale deployment argocd-redis -n argocd --replicas=0 2>/dev/null || true
+sleep 5
 
 # Create gitlab namespace
 kubectl create namespace gitlab 2>/dev/null || true
 
 # Clean up any leftover upgrade-check jobs from previous runs
-kubectl delete job -n gitlab -l app.kubernetes.io/instance=gitlab-upgrade-check 2>/dev/null || true
+kubectl delete job -n gitlab --all 2>/dev/null || true
 
 # Add GitLab Helm repo
 helm repo add gitlab https://charts.gitlab.io 2>/dev/null || true
@@ -62,12 +70,12 @@ echo -e "${GREEN}✓ Bonus Installation Started!${RESET}"
 echo -e "${GREEN}========================================${RESET}"
 echo ""
 
-echo -e "${GREEN}[✓] Part 3 Services (Already Running)${RESET}"
-echo "  ✓ Argo CD: http://localhost:8080"
-echo "  ✓ Playground App: http://localhost:8888"
+echo -e "${GREEN}[✓] Part 3 Services (Temporarily Scaled Down)${RESET}"
+echo "  ⊘ Argo CD: Scaled to 0 replicas (will restart after bonus)"
+echo "  ⊘ Playground App: Still running but isolated"
 echo ""
 
-echo -e "${YELLOW}[!] COMING SOON - GitLab (15-20 mins)${RESET}"
+echo -e "${YELLOW}[!] DEPLOYING - GitLab (15-20 mins)${RESET}"
 echo "  Check status: kubectl get pods -n gitlab"
 echo "  When ready:"
 echo "  kubectl port-forward svc/gitlab-webservice-default -n gitlab 80:8181 &"
@@ -80,3 +88,8 @@ echo "  kubectl logs -n gitlab -f deployment/gitlab-webservice-default"
 echo ""
 
 echo -e "${GREEN}========================================${RESET}"
+echo -e "${GREEN}[→] After GitLab is Ready (Optional)${RESET}"
+echo -e "${GREEN}========================================${RESET}"
+echo -e "${YELLOW}To restart Argo CD (after GitLab is stable):${RESET}"
+echo "  kubectl scale deployment -n argocd --all --replicas=1"
+echo ""
