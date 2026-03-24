@@ -16,6 +16,8 @@ global:
     limits:
       cpu: 100m
       memory: 128Mi
+  initialRootPassword:
+    secret: gitlab-initial-root-password
 
 gitlab:
   # Minimize webservice
@@ -32,6 +34,14 @@ gitlab:
     maxReplicas: 1
     hpa:
       enabled: false
+    init:
+      resources:
+        limits:
+          cpu: 50m
+          memory: 128Mi
+        requests:
+          cpu: 25m
+          memory: 64Mi
   
   # Disable sidekiq completely
   sidekiq:

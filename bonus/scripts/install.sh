@@ -61,6 +61,10 @@ helm upgrade --install gitlab gitlab/gitlab \
   --wait=false \
   --no-hooks &>/dev/null
 
+# Delete broken webservice pods if they exist to force recreation with new config
+sleep 5
+kubectl delete pod -n gitlab -l app.kubernetes.io/name=gitlab-webservice --grace-period=0 --force 2>/dev/null || true
+
 # =============================================================================
 # Summary
 # =============================================================================
