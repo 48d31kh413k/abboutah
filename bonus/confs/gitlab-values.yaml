@@ -83,6 +83,7 @@ prometheus:
 
 certmanager-issuer:
   enabled: false
+  email: admin@gitlab.local
 
 nginx-ingress:
   enabled: false
