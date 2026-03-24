@@ -46,6 +46,11 @@ sleep 5
 # Create gitlab namespace
 kubectl create namespace gitlab 2>/dev/null || true
 
+# Create initial root password secret required by migrations
+kubectl create secret generic gitlab-initial-root-password \
+  --from-literal=password="InsecurePassword1!" \
+  -n gitlab 2>/dev/null || true
+
 # Clean up any leftover upgrade-check jobs from previous runs
 kubectl delete job -n gitlab --all 2>/dev/null || true
 
