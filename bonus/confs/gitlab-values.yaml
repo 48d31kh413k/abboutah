@@ -43,9 +43,12 @@ gitlab:
           cpu: 25m
           memory: 64Mi
   
-  # Disable sidekiq completely
+  # Disable sidekiq and migrations (not needed for fresh local install)
   sidekiq:
     replicaCount: 0
+    enabled: false
+  
+  migrations:
     enabled: false
   
   # Minimal gitaly
