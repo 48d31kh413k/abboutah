@@ -42,15 +42,14 @@ gitlab:
         requests:
           cpu: 200m
           memory: 1Gi
-    extraEnv:
-      SKIP_MIGRATIONS: "true"
   
-  # Disable sidekiq and migrations (not needed for fresh local install)
+  # Enable migrations to initialize database schema
+  migrations:
+    enabled: true
+  
+  # Disable sidekiq (not needed for fresh local install)
   sidekiq:
     replicaCount: 0
-    enabled: false
-  
-  migrations:
     enabled: false
   
   # Minimal gitaly
