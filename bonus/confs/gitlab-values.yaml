@@ -1,4 +1,6 @@
 # Minimal GitLab Helm values for local K3d bonus setup
+installCertmanager: false
+
 global:
   edition: ce
   hosts:
