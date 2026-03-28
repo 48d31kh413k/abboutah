@@ -4,20 +4,14 @@ Vagrant.configure(2) do |config|
   config.vm.provider "virtualbox" do |v|
     v.memory = 1024
     v.cpus = 1
-    v.gui = false
   end
 
   config.vm.define "alagmiriS" do |server|
     server.vm.hostname = "alagmiriS"
-    server.vm.network "private_network", bridge: "eth1", ip: "192.168.56.110"
+    server.vm.network "private_network",ip: "192.168.56.110"
     server.vm.provision "shell", inline: <<-SHELL
       sudo apt-get update -qq 
       sudo apt-get install -qq -y curl net-tools
-
-      curl -fsSL https://get.docker.com -o get-docker.sh
-      sudo sh get-docker.sh 2>&1 >/dev/null
-      sudo usermod -aG docker vagrant
-
       echo 'export PATH=$PATH:/sbin' >> /home/vagrant/.bashrc
       source /home/vagrant/.bashrc
 
