@@ -1,21 +1,21 @@
-# Argo CD Application resource definition for GitOps automation
-apiVersion: argoproj.io/v1alpha1  # Argo CD API version
-kind: Application  # Kubernetes resource kind - defines an Argo CD app
+# Argo CD Application resource definition for GitOps automation  
+apiVersion: argoproj.io/v1alpha1  # Specifies the API version for Argo CD resources
+kind: Application  # Kubernetes resource kind - defines an Argo CD app 
 metadata:
-  name: playground  # Name of this Argo CD application
-  namespace: argocd  # Lives in argocd namespace (system infrastructure)
+  name: playground  # Name of this Argo CD application  
+  namespace: argocd  # Lives in argocd namespace (system infrastructure)  
 spec:
-  project: default  # Use default Argo project
+  project: default  # Use default Argo project  
   source:
-    repoURL: https://github.com/48d31kh413k/abboutah  # GitHub repo containing manifests
-    targetRevision: main  # Track the main branch
-    path: p3/confs/app  # Path to app manifests in the repo
+    repoURL: https://github.com/48d31kh413k/abboutah  # GitHub repo containing manifests  
+    targetRevision: main  # Track the main branch  
+    path: p3/confs/app  # Path to app manifests in the repo 
   destination:
-    server: https://kubernetes.default.svc  # Target the current cluster
-    namespace: dev  # Deploy to the dev namespace
+    server: https://kubernetes.default.svc  # The Kubernetes API server to deploy to
+    namespace: dev   # The namespace where the app will be deployed
   syncPolicy:
     automated:
-      prune: true  # Auto-delete resources removed from Git
-      selfHeal: true  # Auto-revert manual cluster changes
+      prune: true  # Auto-delete resources removed from Git, Automatically delete resources removed from Git
+      selfHeal: true  # Auto-revert manual cluster changes, Automatically revert out-of-band changes
     syncOptions:
       - CreateNamespace=true  # Auto-create dev namespace if missing

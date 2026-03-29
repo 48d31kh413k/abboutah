@@ -1,11 +1,11 @@
-# Namespace for Argo CD (system infrastructure)
-apiVersion: v1  # Core Kubernetes API
-kind: Namespace  # Resource type - creates a virtual cluster
+# Namespace for Argo CD (system infrastructure)  
+apiVersion: v1  # Core Kubernetes API  
+kind: Namespace  # Resource type - creates a virtual cluster 
 metadata:
-  name: argocd  # System namespace for Argo CD components
+  name: argocd   # The name of the namespace for Argo CD
 ---
-# Namespace for application workloads
-apiVersion: v1  # Core Kubernetes API
-kind: Namespace  # Resource type - creates a virtual cluster
+# Namespace for application workloads  
+apiVersion: v1   # Specifies the API version used for this resource
+kind: Namespace  # Declares this resource as a Namespace
 metadata:
-  name: dev  # Application namespace - isolated from system
+  name: dev  # Application namespace - isolated from system 

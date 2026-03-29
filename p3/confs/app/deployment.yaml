@@ -1,11 +1,11 @@
-# Deployment: Manages the playground application pods
-apiVersion: apps/v1  # Kubernetes apps API
-kind: Deployment  # Resource type - ensures desired number of replicas run
+# Deployment: Manages the playground application pods, This section defines a Deployment for the playground app
+apiVersion: apps/v1  # Kubernetes apps API,  Specifies the API version for apps resources
+kind: Deployment  # Resource type - ensures desired number of replicas run  # Declares this resource as a Deployment
 metadata:
-  name: playground  # Deployment name
-  namespace: dev  # Deploy to dev namespace
+  name: playground  # Deployment name 
+  namespace: dev  # The namespace where the deployment will run
 spec:
-  replicas: 1  # Run exactly 1 replica of the app
+  replicas: 1  # Run exactly 1 replica of the app, Number of pod replicas to run
   selector:
     matchLabels:
       app: playground  # Find pods with this label
@@ -15,21 +15,21 @@ spec:
         app: playground  # Label pods so service can find them
     spec:
       containers:
-        - name: playground  # Container name
-          image: wil42/playground:v1 # Docker image to run
-          imagePullPolicy: Always  # Always pull the latest image
+        - name: playground  # Container name 
+          image: wil42/playground:v1 # Docker image to run  
+          imagePullPolicy: Always  # Always pull the image when starting a pod
           ports:
-            - containerPort: 8888  # Container listens on port 8888
+            - containerPort: 8888  # Container listens on port 8888 
 ---
-# Service: Exposes the playground application
-apiVersion: v1  # Core Kubernetes API
-kind: Service  # Resource type - network endpoint for pods
+# Service: Exposes the playground application  # This section defines a Service to expose the app
+apiVersion: v1  #  Specifies the API version for core resources
+kind: Service  # Resource type - network endpoint for pods, Declares this resource as a Service
 metadata:
-  name: playground  # Service name
-  namespace: dev  # In dev namespace
+  name: playground  # The name of the service
+  namespace: dev   The namespace where the service will run
 spec:
   selector:
-    app: playground  # Route traffic to pods with this label
+    app: playground # Selects pods with this label for routing
   ports:
-    - port: 8888  # Service port (external)
-      targetPort: 8888  # Pod port (internal)
+    - port: 8888  # Service port (external) The port exposed by the service
+      targetPort: 8888  # Pod port (internal) The port on the pod to forward to

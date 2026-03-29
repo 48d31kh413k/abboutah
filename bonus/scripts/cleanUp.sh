@@ -1,17 +1,13 @@
-echo "[*] Cleaning existing GitLab installation..."
+echo "[*] Cleaning existing GitLab installation..."  # Start cleanup
 
-# Uninstall Helm release (ignore if not installed)
-helm uninstall gitlab -n gitlab 2>/dev/null || true
+helm uninstall gitlab -n gitlab 2>/dev/null || true  # Uninstall GitLab Helm release
 
-# Delete namespace completely (this removes DB, secrets, everything)
-kubectl delete namespace gitlab --wait=true 2>/dev/null || true
+kubectl delete namespace gitlab --wait=true 2>/dev/null || true  # Delete GitLab namespace and all resources
 
-# Recreate namespace
-kubectl create namespace gitlab
+kubectl create namespace gitlab  # Recreate namespace
 
-# Recreate root password secret
 kubectl create secret generic gitlab-initial-root-password \
   --from-literal=password="InsecurePassword1!" \
-  -n gitlab
+  -n gitlab  # Recreate root password secret
 
-echo "[✓] Clean slate ready"
+echo "[✓] Clean slate ready"  # Done
