@@ -57,9 +57,30 @@ case $COMMAND in
       exit 1
     fi
     GITLAB_REPO=$2
-    
+
+    # Extract GitLab username and password from environment or prompt
+    if [[ -z "${GITLAB_USER:-}" ]]; then
+      read -p "Enter GitLab username for Argo CD: " GITLAB_USER
+    fi
+    if [[ -z "${GITLAB_PASS:-}" ]]; then
+      read -s -p "Enter GitLab password for Argo CD: " GITLAB_PASS
+      echo
+    fi
+
+    # Register the GitLab repo and credentials as an Argo CD repository secret
+    echo "[*] Registering GitLab repository and credentials in Argo CD..."
+    kubectl -n argocd delete secret gitlab-abboutah-repo 2>/dev/null || true
+    kubectl -n argocd create secret generic gitlab-abboutah-repo \
+      --from-literal=url=$GITLAB_REPO \
+      --from-literal=username=$GITLAB_USER \
+      --from-literal=password=$GITLAB_PASS \
+      --type Opaque \
+      --dry-run=client -o yaml | \
+      kubectl label -f - argocd.argoproj.io/secret-type=repository --local -o yaml | \
+      kubectl apply -f -
+
     echo "[*] Configuring Argo CD for GitLab repository..."
-    
+
     # Create temporary app file
     cat > /tmp/argocd-app-temp.yaml <<EOF
 apiVersion: argoproj.io/v1alpha1
@@ -83,11 +104,11 @@ spec:
     syncOptions:
       - CreateNamespace=true
 EOF
-    
+
     kubectl delete app playground-gitlab -n argocd 2>/dev/null || true
     kubectl apply -f /tmp/argocd-app-temp.yaml
     rm /tmp/argocd-app-temp.yaml
-    
+
     echo "[+] Argo CD configured!"
     echo "    Repository: $GITLAB_REPO"
     echo "[*] Waiting for sync..."
