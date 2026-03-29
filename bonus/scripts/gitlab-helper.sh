@@ -43,7 +43,7 @@ case $COMMAND in
     
     git clone --mirror "$GITHUB_URL" repo.git
     cd repo.git
-    git push --mirror "http://${GITLAB_USER}:${GITLAB_PASS}@gitlab-webservice-default.gitlab.svc.cluster.local:8181/${GITLAB_USER}/${REPO_NAME}.git"
+    git push --mirror "http://${GITLAB_USER}:${GITLAB_PASS}@localhost:8081/${GITLAB_USER}/${REPO_NAME}.git"
     
     cd /
     rm -rf "$TEMP_DIR"
