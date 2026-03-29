@@ -26,8 +26,7 @@ apiVersion: v1  #  Specifies the API version for core resources
 kind: Service  # Resource type - network endpoint for pods, Declares this resource as a Service
 metadata:
   name: playground  # The name of the service
-    # The namespace where the service will run
-    namespace: dev
+  namespace: dev # The namespace where the service will run
 spec:
   selector:
     app: playground # Selects pods with this label for routing
