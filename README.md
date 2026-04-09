@@ -337,6 +337,11 @@ cd p3
 Good luck! 🚀
 
 ---
+## Team
+
+This project was delivered as a team effort:
+- khammadi: https://github.com/khammadi
+- alagmiri: https://github.com/AmalLAGMIRI
 
 **Project**: Inception of Things (IoT) — System Administration  
 **Difficulty**: Intermediate to Advanced  
